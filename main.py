@@ -3,7 +3,7 @@ from agent.greedy_agent import GreedyAgent
 from agent.base_agent import Agent
 
 def play_with_agent(agent: Agent):
-    new_game = Game(display_on=True)
+    new_game = Game(need_display=True)
     game_over_times = 0
     while True:
         if game_over_times % 100 == 0:

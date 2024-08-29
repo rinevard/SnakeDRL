@@ -1,31 +1,27 @@
 from .game_logic import GameLogic
 from .game_display import GameDisplay
-from .helper import screen_coord_to_grid
-from .helper import grid_coord_to_screen
+from common.helper import screen_coord_to_grid
+from common.helper import grid_coord_to_screen
+from common.game_elements import Action
 
 WIDTH = 640
 HEIGHT = 480
 BLOCK_SIZE = 20
 
 class Game:
-    def __init__(self, display_on=False):
+    def __init__(self, need_display=False):
         # use WIDTH - BLOCK_SIZE to change bottom-right to top-left
         grid_size = screen_coord_to_grid((WIDTH - BLOCK_SIZE, HEIGHT - BLOCK_SIZE), BLOCK_SIZE)
         self.logic = GameLogic(grid_size[0], grid_size[1])
-        self.display_on = display_on
+        self.display_on = need_display
         self.display = GameDisplay(width=WIDTH, height=HEIGHT, block_size=BLOCK_SIZE) if self.display_on else None
 
-    def step(self, action):
+    def step(self, action: Action):
         """
         Execute a step in the environment based on the given action.
-        Parameters:
-            action (int): The action to be performed.
-                - 0: Continue in the current direction
-                - -1: Turn left
-                - 1: Turn right
         """
         self.logic.step(action)
-        self.display.handle_event() # make it possible to move pygame window
+        self.display.handle_event() # make it possible to drag pygame window around
         if self.display_on:
             self._render_and_delay()
         return

@@ -1,4 +1,5 @@
 import random
+from common.game_elements import Action
 
 class GameLogic:
     def __init__(self, grid_width, grid_height) -> None:
@@ -14,23 +15,18 @@ class GameLogic:
                 self.food = (x, y)
                 break
 
-    def step(self, action: int) -> None:
+    def step(self, action: Action) -> None:
         """
         Execute a step in the environment based on the given action.
-        Parameters:
-            action (int): The action to be performed.
-                - 0: Continue in the current direction
-                - -1: Turn left
-                - 1: Turn right
         """
         # 0. if game is over, return
         if self.is_game_over:
             return
 
         # 1. Update direction based on action
-        if action == -1:  # Turn left
+        if action == Action.TURN_LEFT:  # Turn left
             self.direction = (self.direction[1], -self.direction[0])
-        elif action == 1:  # Turn right
+        elif action == Action.TURN_RIGHT:  # Turn right
             self.direction = (-self.direction[1], self.direction[0])
 
         # 2. Move snake
