@@ -81,7 +81,7 @@ def state_dic_to_state_tensor(state_dict, width=640, height=480, block_size=20) 
         Coordinates are grid coordinates.
     """
     assert state_dict, "'state_dict' is " + str(state_dict) + " !"
-    
+
     # first build a game grid, then padding with '-10'
     # possible places: (range(0, grid_w), range(0, grid_h))
     grid_w, grid_h = screen_coord_to_grid((width, height), 
@@ -111,6 +111,7 @@ def state_dic_to_state_tensor(state_dict, width=640, height=480, block_size=20) 
 
 
 """
+import time
 # 测试代码
 def test():
     state_dict = {
@@ -121,6 +122,14 @@ def test():
         'is_game_over': False
     }
     
-    tensor = state_dic_to_state_tensor(state_dict, width=120, height=120, block_size=20)
-    print(tensor)
+    tensor = state_dic_to_state_tensor(state_dict, width=640, height=480, block_size=20)
+
+num_tests = 100
+start_time = time.time()
+for _ in range(num_tests):
+    test()
+end_time = time.time()
+
+avg_time = (end_time - start_time) / num_tests
+print(f"Average predict time: {avg_time*1000:.2f} ms")
 """
