@@ -31,13 +31,13 @@ class Game:
         Get current state of the game.
 
         Returns:
-        dict: A dictionary containing the following keys:
-        - 'snake' (list of tuple): List of coordinates representing the snake's body.
-          Each element is a tuple (x: int, y: int). snake[0] is the position of the snake's head.
-        - 'direction' (tuple): x = 1 if right else -1; y = 1 if down else -1.
-        - 'food' (tuple): Coordinates of the food as a tuple (x: int, y: int).
-        - 'score' (int)
-        - 'is_game_over' (bool)
+            A dictionary containing the following keys
+            - 'snake' (list of tuple): List of coordinates representing the snake's body.
+            Each element is a tuple (x: int, y: int). snake[0] is the position of the snake's head.
+            - 'direction' (tuple): x = 1 if right else -1; y = 1 if down else -1.
+            - 'food' (tuple): Coordinates of the food as a tuple (x: int, y: int).
+            - 'score' (int)
+            - 'is_game_over' (bool)
 
         Note:
             Coordinates represent the top-left corner of each cell.

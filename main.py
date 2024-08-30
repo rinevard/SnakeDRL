@@ -20,6 +20,5 @@ def play_with_agent(agent: Agent):
             print(f"Times: {game_over_times}, Score: {game_state_dic['score']}")
             new_game.reset()
 
-
 greedy_agent = GreedyAgent()
 play_with_agent(greedy_agent)
