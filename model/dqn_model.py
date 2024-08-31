@@ -7,6 +7,17 @@ import os
 
 class SnakeDQN(nn.Module):
     def __init__(self, input_width: int, input_height: int, in_channels=1, num_actions=3):
+        """
+        Deep Q-Network for the Snake game.
+
+        Computes Q-values for all possible actions given a state of the game.
+        
+        Input:
+            A tensor with size('batch_size', 'in_channels', 'input_width', 'input_height') representing the current state of the Snake game.
+        
+        Output:
+            A tensor with size ('batch_size', 'num_actions') of Q-values for each possible action (turn right, go straight, turn left).
+        """
         super().__init__()
         self.features = nn.Sequential(
             nn.Conv2d(in_channels, 16, kernel_size=3, stride=2, padding=1),
@@ -34,10 +45,12 @@ class SnakeDQN(nn.Module):
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
                 init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
-                init.constant_(m.bias, 0)
+                if m.bias is not None:
+                    init.constant_(m.bias, 0.0)
             elif isinstance(m, nn.Linear):
                 init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
-                init.constant_(m.bias, 0)
+                if m.bias is not None:
+                    init.constant_(m.bias, 0.0)
     
 
 
@@ -48,7 +61,7 @@ input_width, input_height = 32, 24
 model = SnakeDQN(input_width, input_height)
 
 # random input
-x = torch.randn(1, 1, input_height, input_width)
+x = torch.randn(1, input_height, input_width)
 
 for _ in range(10):
     model(x)

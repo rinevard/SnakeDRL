@@ -1,22 +1,23 @@
 from .game_logic import GameLogic
 from .game_display import GameDisplay
-from common.helper import screen_coord_to_grid
-from common.helper import grid_coord_to_screen
+from common.helper import convert_screen_coord_to_grid
+from common.helper import convert_grid_coord_to_screen
+from common.game_elements import WIDTH
+from common.game_elements import HEIGHT
+from common.game_elements import BLOCK_SIZE
 from common.game_elements import Action
-
-WIDTH = 640
-HEIGHT = 480
-BLOCK_SIZE = 20
+from common.game_elements import State
 
 class Game:
-    def __init__(self, need_display=False):
+    def __init__(self, display_on=False):
         # use WIDTH - BLOCK_SIZE to change bottom-right to top-left
-        grid_size = screen_coord_to_grid((WIDTH - BLOCK_SIZE, HEIGHT - BLOCK_SIZE), BLOCK_SIZE)
+        grid_size = convert_screen_coord_to_grid((WIDTH - BLOCK_SIZE, HEIGHT - BLOCK_SIZE), BLOCK_SIZE)
         self.logic = GameLogic(grid_size[0], grid_size[1])
-        self.display_on = need_display
-        self.display = GameDisplay(width=WIDTH, height=HEIGHT, block_size=BLOCK_SIZE) if self.display_on else None
+        self.display_on = display_on
+        self.display = GameDisplay(width=WIDTH, height=HEIGHT, block_size=BLOCK_SIZE)
+        self.reset()
 
-    def step(self, action: Action):
+    def step(self, action: Action) -> None:
         """
         Execute a step in the environment based on the given action.
         """
@@ -26,58 +27,32 @@ class Game:
             self._render_and_delay()
         return
     
-    def get_state(self):
-        """
-        Get current state of the game.
-
-        Returns:
-            A dictionary containing the following keys
-            - 'snake' (list of tuple): List of coordinates representing the snake's body.
-            Each element is a tuple (x: int, y: int). snake[0] is the position of the snake's head.
-            - 'direction' (tuple): x = 1 if right else -1; y = 1 if down else -1.
-            - 'food' (tuple): Coordinates of the food as a tuple (x: int, y: int).
-            - 'score' (int)
-            - 'is_game_over' (bool)
-
-        Note:
-            Coordinates represent the top-left corner of each cell.
-            Coordinates are grid coordinates.
-
-        Example:
-        {
-            'snake': [(5, 5), (4, 5), (3, 5)],
-            'direction': (-1, 1)
-            'food': (8, 3),
-            'score': 2
-            'is_game_over': False
-        }
-        """
+    def get_state(self) -> State:
         return self.logic.get_state()
 
-    def reset(self):
+    def reset(self) -> None:
         return self.logic.reset()
 
-    def set_display_on(self):
+    def set_display_on(self) -> None:
         self.display_on = True
         return 
 
-    def set_display_off(self):
+    def set_display_off(self) -> None:
         self.display_on = False
         return 
 
-    def _close(self):
+    def _close(self) -> None:
         if self.display:
             self.display.close()
 
-    def _render_and_delay(self):
+    def _render_and_delay(self) -> None:
         """
         Note: Code about time delay is in 'self.display.render'
         """
-        state_dic = self.logic.get_state()
-        snake = [grid_coord_to_screen(grid_coord, BLOCK_SIZE) for grid_coord in state_dic['snake']]
-        food = grid_coord_to_screen(state_dic['food'], BLOCK_SIZE)
-        score = state_dic['score']
-        is_game_over = state_dic['is_game_over']
-        self.display.render_and_delay(snake, food, score, is_game_over)
-
-
+        cur_state = self.get_state()
+        snake = [convert_grid_coord_to_screen(grid_coord, BLOCK_SIZE)
+                 for grid_coord in cur_state.snake]
+        food = convert_grid_coord_to_screen(cur_state.food, BLOCK_SIZE)
+        score = cur_state.get_score()
+        game_over = cur_state.is_game_over()
+        self.display.render_and_delay(snake, food, score, game_over)

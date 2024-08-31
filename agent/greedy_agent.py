@@ -1,21 +1,22 @@
 from common.game_elements import Action
-from common.helper import global_pos_to_relative_pos
+from common.game_elements import State
+from common.game_elements import Direction
+from common.helper import convert_global_pos_to_relative_pos
 from .base_agent import Agent
 
 class GreedyAgent(Agent):
     def __init__(self) -> None:
         super().__init__()
 
-    def get_action(self, state=None) -> Action:
+    def get_action(self, state: State=None) -> Action:
         if not state:
             return 0
         
-        snake = state['snake']
-        food = state['food']
-        direction = state['direction']
-        head = snake[0]
+        food = state.get_food()
+        direction = state.get_direction()
+        head = state.get_snake_head()
 
-        relative_vec = global_pos_to_relative_pos(head, direction, food)
+        relative_vec = convert_global_pos_to_relative_pos(head, direction, food)
         # Move horizontally until the x-coordinate aligns with the food, then move vertically
 
         # Note that x-axis is 90 degrees **counterclockwise** from the y-axis 
