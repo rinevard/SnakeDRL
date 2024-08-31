@@ -24,7 +24,6 @@ def convert_direction_to_tuple(direction: Direction) -> tuple[int, int]:
         case _:
             raise ValueError(f"Invalid direction: {direction}")
 
-
 def convert_grid_coord_to_screen(grid_coord: tuple[int, int], block_size: int) -> tuple[int, int]:
     """
     Convert grid coordinates to screen coordinates.
@@ -41,7 +40,6 @@ def convert_grid_coord_to_screen(grid_coord: tuple[int, int], block_size: int) -
     """
     grid_x, grid_y = grid_coord
     return (grid_x * block_size, grid_y * block_size)
-
 
 def convert_screen_coord_to_grid(screen_coord: tuple[int, int], block_size: int) -> tuple[int, int]:
     """
@@ -82,7 +80,6 @@ def convert_global_pos_to_relative_pos(origin_point_pos: tuple[int, int],
                             -(target_global_pos[0] - origin_point_pos[0]))
 
     return relative_pos
-
 
 def convert_action_to_action_idx(action: Action) -> int:
     """

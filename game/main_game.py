@@ -2,11 +2,7 @@ from .game_logic import GameLogic
 from .game_display import GameDisplay
 from common.helper import convert_screen_coord_to_grid
 from common.helper import convert_grid_coord_to_screen
-from common.game_elements import WIDTH
-from common.game_elements import HEIGHT
-from common.game_elements import BLOCK_SIZE
-from common.game_elements import Action
-from common.game_elements import State
+from common.game_elements import *
 
 class Game:
     def __init__(self, display_on=False):

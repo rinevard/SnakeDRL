@@ -1,6 +1,4 @@
-from common.game_elements import Action
-from common.game_elements import State
-from common.game_elements import Direction
+from common.game_elements import *
 from common.helper import convert_global_pos_to_relative_pos
 from .base_agent import Agent
 

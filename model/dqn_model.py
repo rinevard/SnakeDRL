@@ -6,32 +6,32 @@ import torch.nn.init as init
 import os
 
 class SnakeDQN(nn.Module):
-    def __init__(self, input_width: int, input_height: int, in_channels=1, num_actions=3):
+    def __init__(self, input_height: int, input_width: int, in_channels=3, num_actions=3):
         """
         Deep Q-Network for the Snake game.
 
         Computes Q-values for all possible actions given a state of the game.
         
         Input:
-            A tensor with size('batch_size', 'in_channels', 'input_width', 'input_height') representing the current state of the Snake game.
+            A tensor with size('batch_size', 'in_channels', 'input_height', 'input_width') representing the current state of the Snake game.
         
         Output:
             A tensor with size ('batch_size', 'num_actions') of Q-values for each possible action (turn right, go straight, turn left).
         """
         super().__init__()
+        inner_channel = 16
+        output_channel = 4
         self.features = nn.Sequential(
-            nn.Conv2d(in_channels, 16, kernel_size=3, stride=2, padding=1),
+            nn.Conv2d(in_channels, inner_channel, kernel_size=3, padding=1),
             nn.ReLU(),
-            nn.Conv2d(16, 1, kernel_size=3, stride=2, padding=1),
+            nn.Conv2d(inner_channel, output_channel, kernel_size=3, padding=1),
             nn.ReLU()
         )
 
-        output_width_1 = (input_width - 3 + 2 * 1) // 2 + 1
-        output_height_1 = (input_height - 3 + 2 * 1) // 2 + 1
-        output_width_2 = (output_width_1 - 3 + 2 * 1) // 2 + 1
-        output_height_2 = (output_height_1 - 3 + 2 * 1) // 2 + 1
+        ouput_width = input_width
+        output_height = input_height
 
-        self.fc = nn.Linear(output_width_2 * output_height_2, num_actions)
+        self.fc = nn.Linear(ouput_width * output_height * output_channel, num_actions)
         self._initialize_weights()
 
     def forward(self, x: torch.Tensor):
@@ -53,15 +53,16 @@ class SnakeDQN(nn.Module):
                     init.constant_(m.bias, 0.0)
     
 
-
 """
 import time
 
 input_width, input_height = 32, 24
 model = SnakeDQN(input_width, input_height)
+model.eval()
 
 # random input
-x = torch.randn(1, input_height, input_width)
+batch_size = 64
+x = torch.randn(batch_size, 3, input_height, input_width)
 
 for _ in range(10):
     model(x)

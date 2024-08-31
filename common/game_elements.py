@@ -1,8 +1,8 @@
 import torch
 from enum import Enum
 
-WIDTH = 640
-HEIGHT = 480
+WIDTH = 200
+HEIGHT = 200
 BLOCK_SIZE = 20
 
 class Action(Enum):
@@ -23,7 +23,7 @@ class State:
                  score: int, 
                  game_over: bool, 
                  grid_width=(WIDTH - BLOCK_SIZE) // BLOCK_SIZE, 
-                 grid_height=(WIDTH - BLOCK_SIZE) // BLOCK_SIZE) -> None:
+                 grid_height=(HEIGHT - BLOCK_SIZE) // BLOCK_SIZE) -> None:
         """
         Parameters:
             snake: List of coordinates representing the snake's body.
@@ -46,6 +46,7 @@ class State:
         self.game_over = game_over
         self.grid_width = grid_width
         self.grid_height = grid_height
+        self.steps_of_do_nothing = 0
 
     def get_snake(self) -> list[tuple[int, int]]:
         """
@@ -103,9 +104,9 @@ class State:
         A tensor with shape (3, grid_height + 1, grid_width + 1) and dtype float32:
         
         1. Grid Game Channel:
-        - 1 represents the snake's head 
-        - -1 represents the snake's body
-        - 5 represents food
+        - 1 represents the snake's body
+        - 2 represents the snake's head 
+        - 3 represents food
         - 0 represents background (empty cells)
             
         2. Direction Channel:
@@ -117,8 +118,8 @@ class State:
             
         3. Game Over Channel:
         Filled with a single value indicating the game state:
-        - 0 if the game is ongoing
-        - 1 if the game is over
+        - steps_of_do_nothing if the game is ongoing
+        - -1 if the game is over
 
         Note:
         The tensor uses grid coordinates, where (0, 0) is the top-left corner.
@@ -130,9 +131,9 @@ class State:
         snake_body = self.get_snake_body()
         food = self.food
         for seg in snake_body:
-            grid_channel[(seg[1], seg[0])] = -1.0
-        grid_channel[head[1], head[0]] = 1.0
-        grid_channel[food[1], food[0]] = 5.0
+            grid_channel[(seg[1], seg[0])] = 1.0
+        grid_channel[head[1], head[0]] = 2.0
+        grid_channel[food[1], food[0]] = 3.0
 
         # direction_channel
         direction = 0
@@ -148,7 +149,7 @@ class State:
         direction_channel = torch.full(shape, direction, dtype=torch.float32)
 
         # game_over_channel 
-        game_over = 1 if self.game_over else 0
+        game_over = -1 if self.game_over else self.steps_of_do_nothing
         game_over_channel = torch.full(shape, game_over, dtype=torch.float32)
 
         return torch.stack((grid_channel, direction_channel, game_over_channel), dim=0)

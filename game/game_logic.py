@@ -1,7 +1,5 @@
 import random
-from common.game_elements import Action
-from common.game_elements import State
-from common.game_elements import Direction
+from common.game_elements import *
 from common.helper import convert_direction_to_tuple
 
 class GameLogic:
@@ -39,6 +37,7 @@ class GameLogic:
             self.game_state.direction = directions[(direction_idx + 1) % len(directions)]
         elif action == Action.TURN_RIGHT:  # Turn right
             self.game_state.direction = directions[(direction_idx - 1) % len(directions)]
+        direction = self.game_state.direction
 
         # 2. Move snake
         snake = self.game_state.snake
@@ -51,7 +50,7 @@ class GameLogic:
         # 3. Check if snake hit the wall
         if (new_head[0] < 0 or new_head[0] > self.grid_width or
             new_head[1] < 0 or new_head[1] > self.grid_height or
-            self.steps_of_do_nothing >= 40 * len(self.game_state.snake)):
+            self.game_state.steps_of_do_nothing >= 40 * len(self.game_state.snake)):
             self.game_state.game_over = True
             return
 
@@ -60,11 +59,11 @@ class GameLogic:
 
         # 5. Check if snake ate food
         if new_head == self.game_state.food:
-            self.steps_of_do_nothing = 0
+            self.game_state.steps_of_do_nothing = 0
             self.game_state.score += 1
             self._place_food()
         else:
-            self.steps_of_do_nothing += 1
+            self.game_state.steps_of_do_nothing += 1
             self.game_state.snake.pop()
 
         # 6. Check if snake collided with itself
@@ -82,6 +81,8 @@ class GameLogic:
         score = 0
         game_over = False
 
-        self.steps_of_do_nothing = 0
         self.game_state = State(snake, direction, None, score, game_over)
+        self.game_state.steps_of_do_nothing = 0
         self._place_food()
+
+

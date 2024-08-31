@@ -1,0 +1,130 @@
+import torch
+import torch.nn.functional as F
+import random
+from collections import deque
+from agent.base_agent import LearningAgent
+from model.dqn_model import SnakeDQN
+from common.game_elements import *
+from common.helper import convert_action_to_action_idx
+
+class ReplayBuffer():
+    def __init__(self, capacity) -> None:
+        self.buffer = deque(maxlen=capacity)
+
+    def add(self, experience: tuple[torch.Tensor, int, float, torch.Tensor, bool]) -> None:
+        """
+        Add (s, a, r, s', done) into buffer.
+
+        Note:
+        There's no need to worry about overload.
+        """
+        # when the deque reaches its maxlen, 
+        # it automatically removes the oldest item for new one.
+        self.buffer.append(experience)
+        return
+
+    def sample(self, batch_size) -> list[tuple[torch.Tensor, int, float, torch.Tensor, bool]]:
+        """
+        Randomly sample and return a list with length 'batch_size' 
+        of experiences (s, a, r, s', done).
+
+        Note: 
+        'batch_size' must be less or equal to the length of the buffer.
+        """
+        return random.sample(self.buffer, batch_size)
+
+    def __len__(self):
+        return len(self.buffer)
+
+class DQNAgent(LearningAgent):
+    def __init__(self, main_model: SnakeDQN, target_model: SnakeDQN, 
+                 learning_rate=0.0001, gamma=0.9,
+                 epsilon_start=1.0, epsilon_end=0.1, epsilon_decay=0.999,
+                 buffer_capacity=10000, batch_size=64, target_update_frequency=10, 
+                 actions=[Action.TURN_RIGHT, Action.GO_STRAIGHT, Action.TURN_LEFT]):
+        """
+        Note:
+        num_actions of 'main_model' and 'target_model' must be equal to len('actions')
+        """
+        self.main_target_gap = 0
+        self.batch_size = batch_size
+        self.replay_buffer = ReplayBuffer(buffer_capacity)
+        self.main_model = main_model
+        self.target_model = target_model
+        self.optimizer = torch.optim.Adam(self.main_model.parameters(), lr=learning_rate)
+
+        self.gamma = gamma
+        self.epsilon = epsilon_start
+        self.epsilon_end = epsilon_end
+        self.epsilon_decay = epsilon_decay
+
+        self.target_update_frequency = target_update_frequency
+        self.actions = actions
+        super().__init__()
+
+    def get_action(self, state: State = None) -> Action:
+        if random.random() < self.epsilon:
+            return random.choice(self.actions)
+        else:
+            with torch.no_grad():
+                # shape: (3, grid_height + 1, grid_width + 1)
+                state_tensor = state.get_state_tensor()
+                # shape: (3, )
+                q_values = self.main_model(state_tensor.unsqueeze(dim=0))
+                return self.actions[torch.argmax(q_values).item()]
+    
+    def memorize(self, state: State, action: Action, reward: float, next_state: State, done: bool) -> None:
+        """"
+        Remember (s, a, r, s', done), which would be used for method 'learn'.
+        """
+        s = state.get_state_tensor()
+        a = convert_action_to_action_idx(action)
+        r = reward
+        s_new = next_state.get_state_tensor()
+        exprience = (s, a, r, s_new, done)
+        self.replay_buffer.add(exprience)
+        return
+    
+    def learn(self) -> float:
+        if len(self.replay_buffer) < self.batch_size:
+            return None
+        
+        # convert (s, a, r, s', done) into tensor type
+        expriences = self.replay_buffer.sample(self.batch_size)
+        states, actions, rewards, next_states, dones = zip(*expriences)
+        states = torch.stack(states)
+        actions = torch.tensor(actions, dtype=torch.int64)  
+        rewards = torch.tensor(rewards, dtype=torch.float32)
+        next_states = torch.stack(next_states)
+        dones = torch.tensor(dones, dtype=torch.float32)
+
+        # use 'gather' to get corresponding q-values
+        predict_q_values: torch.Tensor = self.main_model(states).gather(dim=1, index=actions.unsqueeze(1))
+        # use 'detach' to prevent gradient propagation 
+        max_next_q_values: torch.Tensor = self.target_model(next_states).max(1).values.detach()
+        target_q_values: torch.Tensor = rewards +  (1 - dones) * self.gamma * max_next_q_values
+        
+        loss = F.mse_loss(predict_q_values.squeeze(), target_q_values)
+
+        self.optimizer.zero_grad()
+        loss.backward()
+        torch.nn.utils.clip_grad_norm_(self.main_model.parameters(), max_norm=1.0)
+        self.optimizer.step()
+        
+        self.main_target_gap += 1
+        if self.main_target_gap >= self.target_update_frequency:
+            self.main_target_gap = 0
+            self.synchronize_networks()
+        self.update_epsilon()
+        return loss.item()
+    
+    def synchronize_networks(self) -> None:
+        self.target_model.load_state_dict(self.main_model.state_dict())
+        return
+    
+    def update_epsilon(self) -> None:
+        self.epsilon *= self.epsilon_decay
+        if self.epsilon <= self.epsilon_end:
+            self.epsilon = self.epsilon_end
+        return
+
