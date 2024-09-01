@@ -94,56 +94,103 @@ class State:
                 return step
         return max(self.grid_width, self.grid_height) + 2
     
+    def get_closest_danger_distances(self, pos: tuple[int, int], straight_direction: Direction) -> tuple[int, int, int]:
+        """
+        return (right_danger_dis, straight_danger_dis, left_danger_dis)
+        """
+        left_direction: Direction = change_direction(straight_direction, Action.TURN_LEFT)
+        right_direction: Direction = change_direction(straight_direction, Action.TURN_RIGHT)
+
+        right_danger_dis: int = self.get_closest_danger_dis(pos, right_direction)
+        straight_danger_dis: int = self.get_closest_danger_dis(pos, straight_direction)
+        left_danger_dis: int = self.get_closest_danger_dis(pos, left_direction)
+
+        return (right_danger_dis, straight_danger_dis, left_danger_dis)
+
+
     def get_state_tensor(self) -> torch.Tensor:
         """
         Return a tensor representation of the current game state
 
         Returns:
-        A tensor with shape (9,)
+        A tensor with shape (15,)
 
         idx:
         direction_x: 0
         direction_y: 1
         food_relative_pos: 2, 3
-        right_danger_dis: 4
-        straight_danger_dis: 5
-        left_danger_dis: 6
-        snake_len: 7
-        steps_of_do_nothing: 8
+        snake_len: 4
+        steps_of_do_nothing: 5
 
+        right_danger_dis_after_turn_right: 6
+        straight_danger_dis_after_turn_right: 7
+        left_danger_dis_after_turn_right: 8
+        
+        right_danger_dis_after_go_straight: 9
+        straight_danger_dis_after_go_straight: 10
+        left_danger_dis_after_go_straight: 11
+
+        right_danger_dis_after_turn_left: 12
+        straight_danger_dis_after_turn_left: 13
+        left_danger_dis_after_turn_left: 14
         """
         head: tuple[int, int] = self.get_snake_head()
         body: list[tuple[int, int]] = self.get_snake_body()
         food: tuple[int, int] = self.get_food()
 
         direction: Direction = self.get_direction()
+        # direction_x, direction_y
         direction_tuple: tuple[int, int] = convert_direction_to_tuple(direction)
+        # food_relative_pos
         food_relative_pos: tuple[int, int] = convert_global_pos_to_relative_pos(head, 
                                                                direction, 
                                                                food)
+
+        # snake_len
+        snake_length: int = len(self.get_snake())
+        # steps_of_do_nothing
+        steps_of_do_nothing: int = self.steps_of_do_nothing
+
+        # danger_distances
         straight_direction: Direction = self.direction
         left_direction: Direction = change_direction(straight_direction, Action.TURN_LEFT)
         right_direction: Direction = change_direction(straight_direction, Action.TURN_RIGHT)
 
-        right_danger_dis: int = self.get_closest_danger_dis(head, right_direction)
-        straight_danger_dis: int = self.get_closest_danger_dis(head, straight_direction)
-        left_danger_dis: int = self.get_closest_danger_dis(head, left_direction)
-
-        snake_length: int = len(self.get_snake())
-        steps_of_do_nothing: int = self.steps_of_do_nothing
-
-        # shape: (9,)
+        right_direction_tuple: tuple[int, int] = convert_direction_to_tuple(right_direction)
+        straight_direction_tuple: tuple[int, int] = convert_direction_to_tuple(straight_direction)
+        left_direction_tuple: tuple[int, int] = convert_direction_to_tuple(left_direction)
+        
+        head_after_turn_right: tuple[int, int] = (head[0] + right_direction_tuple[0], 
+                                                 head[1] + right_direction_tuple[1])
+        head_after_go_straight: tuple[int, int] = (head[0] + straight_direction_tuple[0], 
+                                                   head[1] + straight_direction_tuple[1])
+        head_after_turn_left: tuple[int, int] = (head[0] + left_direction_tuple[0], 
+                                                 head[1] + left_direction_tuple[1])
+        
+        danger_distances_after_turn_right = self.get_closest_danger_distances(head_after_turn_right, 
+                                                                              right_direction)
+        danger_distances_after_go_straight = self.get_closest_danger_distances(head_after_go_straight, 
+                                                                               straight_direction)
+        danger_distances_after_turn_left = self.get_closest_danger_distances(head_after_turn_left, 
+                                                                             left_direction)
+        # shape: (15,)
         # dtype: torch.float32
         return torch.tensor([
             direction_tuple[0], 
             direction_tuple[1], 
             food_relative_pos[0], 
             food_relative_pos[1], 
-            right_danger_dis, 
-            straight_danger_dis, 
-            left_danger_dis, 
             snake_length, 
             steps_of_do_nothing, 
+            danger_distances_after_turn_right[0], 
+            danger_distances_after_turn_right[1], 
+            danger_distances_after_turn_right[2],
+            danger_distances_after_go_straight[0], 
+            danger_distances_after_go_straight[1], 
+            danger_distances_after_go_straight[2],
+            danger_distances_after_turn_left[0], 
+            danger_distances_after_turn_left[1], 
+            danger_distances_after_turn_left[2], 
         ]).to(dtype=torch.float32)
 
     def get_grid_state(self) -> torch.Tensor:
@@ -180,3 +227,4 @@ class State:
             grid_width=self.grid_width,
             grid_height=self.grid_height
         )
+

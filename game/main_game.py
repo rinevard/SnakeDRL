@@ -1,7 +1,7 @@
 from game.game_display import GameDisplay
 from game.game_logic import GameLogic
 from common.game_elements import *
-from common.states import *
+from game.states import *
 from common.utils import *
 
 class Game:

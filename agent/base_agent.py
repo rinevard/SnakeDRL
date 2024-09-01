@@ -1,5 +1,5 @@
 from common.game_elements import *
-from common.states import *
+from game.states import *
 
 class Agent():
     """

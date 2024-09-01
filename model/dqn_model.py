@@ -12,6 +12,8 @@ class SnakeLinerDQN(nn.Module):
             nn.ReLU(), 
             nn.Linear(mid_size, mid_size), 
             nn.ReLU(), 
+            nn.Linear(mid_size, mid_size), 
+            nn.ReLU(), 
             nn.Linear(mid_size, output_size)
         )
         self._initialize_weights()
