@@ -4,8 +4,8 @@ Using reinforcement learning to teach AI to play Snake
 
 In a Snake game played on a 32x24 grid, the agent I trained over approximately 2000 episodes can achieve a score of around 70 points.
 
-![alt text](loss.png)
-![alt text](score106.png)
+![alt text](pngs/loss.png)
+![alt text](pngs/score106.png)
 
 Packages requirement: pygame, torch, torchvision, matplotlib
 
