@@ -1,5 +1,4 @@
-from common.game_elements import *
-from common.helper import convert_global_pos_to_relative_pos
+from common.helper import *
 from .base_agent import Agent
 
 class GreedyAgent(Agent):

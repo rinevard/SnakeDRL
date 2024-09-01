@@ -3,11 +3,14 @@ import torch.nn.functional as F
 import random
 from collections import deque
 from agent.base_agent import LearningAgent
-from model.dqn_model import SnakeDQN
-from common.game_elements import *
+from model.dqn_model import *
+from common.helper import *
 from common.helper import convert_action_to_action_idx
 
 class ReplayBuffer():
+    """
+    Store experience: tuple[Tensor, int, float, Tensor, bool]
+    """
     def __init__(self, capacity) -> None:
         self.buffer = deque(maxlen=capacity)
 
@@ -37,16 +40,17 @@ class ReplayBuffer():
         return len(self.buffer)
 
 class DQNAgent(LearningAgent):
-    def __init__(self, main_model: SnakeDQN, target_model: SnakeDQN, 
-                 learning_rate=0.0001, gamma=0.9,
-                 epsilon_start=1.0, epsilon_end=0.1, epsilon_decay=0.999,
-                 buffer_capacity=10000, batch_size=64, target_update_frequency=10, 
+    def __init__(self, main_model: SnakeLinerDQN, target_model: SnakeLinerDQN, 
+                 learning_rate=1e-5, gamma=0.99,
+                 epsilon_start=1.0, epsilon_end=0.025, epsilon_delay_time=10000, 
+                 buffer_capacity=2000, batch_size=64, 
+                 main_update_frequency=1, target_update_frequency=200, 
                  actions=[Action.TURN_RIGHT, Action.GO_STRAIGHT, Action.TURN_LEFT]):
         """
         Note:
         num_actions of 'main_model' and 'target_model' must be equal to len('actions')
         """
-        self.main_target_gap = 0
+        self.epsilon_decay_step = (epsilon_start - epsilon_end) / epsilon_delay_time
         self.batch_size = batch_size
         self.replay_buffer = ReplayBuffer(buffer_capacity)
         self.main_model = main_model
@@ -56,8 +60,10 @@ class DQNAgent(LearningAgent):
         self.gamma = gamma
         self.epsilon = epsilon_start
         self.epsilon_end = epsilon_end
-        self.epsilon_decay = epsilon_decay
 
+        self.current_steps = 0 # when % main_frequency == 0, update main; 
+                               # when % target_frequency == 0, synchronize networks
+        self.main_update_frequency = main_update_frequency
         self.target_update_frequency = target_update_frequency
         self.actions = actions
         super().__init__()
@@ -67,9 +73,9 @@ class DQNAgent(LearningAgent):
             return random.choice(self.actions)
         else:
             with torch.no_grad():
-                # shape: (3, grid_height + 1, grid_width + 1)
+                # shape: (9, )
                 state_tensor = state.get_state_tensor()
-                # shape: (3, )
+                # shape: (1, 3)
                 q_values = self.main_model(state_tensor.unsqueeze(dim=0))
                 return self.actions[torch.argmax(q_values).item()]
     
@@ -86,10 +92,13 @@ class DQNAgent(LearningAgent):
         return
     
     def learn(self) -> float:
-        if len(self.replay_buffer) < self.batch_size:
+        self.current_steps += 1
+        if ((len(self.replay_buffer) < self.batch_size) or 
+        (self.current_steps % self.main_update_frequency != 0)):
             return None
         
         # convert (s, a, r, s', done) into tensor type
+        # tensor, int, float, tensor, bool
         expriences = self.replay_buffer.sample(self.batch_size)
         states, actions, rewards, next_states, dones = zip(*expriences)
         states = torch.stack(states)
@@ -111,9 +120,8 @@ class DQNAgent(LearningAgent):
         torch.nn.utils.clip_grad_norm_(self.main_model.parameters(), max_norm=1.0)
         self.optimizer.step()
         
-        self.main_target_gap += 1
-        if self.main_target_gap >= self.target_update_frequency:
-            self.main_target_gap = 0
+        if self.current_steps >= self.target_update_frequency:
+            self.current_steps = 0
             self.synchronize_networks()
         self.update_epsilon()
         return loss.item()
@@ -123,7 +131,7 @@ class DQNAgent(LearningAgent):
         return
     
     def update_epsilon(self) -> None:
-        self.epsilon *= self.epsilon_decay
+        self.epsilon -= self.epsilon_decay_step
         if self.epsilon <= self.epsilon_end:
             self.epsilon = self.epsilon_end
         return

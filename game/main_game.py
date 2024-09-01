@@ -1,8 +1,6 @@
 from .game_logic import GameLogic
 from .game_display import GameDisplay
-from common.helper import convert_screen_coord_to_grid
-from common.helper import convert_grid_coord_to_screen
-from common.game_elements import *
+from common.helper import *
 
 class Game:
     def __init__(self, display_on=False):
@@ -24,7 +22,85 @@ class Game:
         return
     
     def get_state(self) -> State:
-        return self.logic.get_state()
+        return self.logic.get_state().copy()
+
+    def reset(self) -> None:
+        return self.logic.reset()
+
+    def set_display_on(self) -> None:
+        self.display_on = True
+        return 
+
+    def set_display_off(self) -> None:
+        self.display_on = False
+        return 
+
+    def _close(self) -> None:
+        if self.display:
+            self.display.close()
+
+    def _render_and_delay(self) -> None:
+        """
+        Note: Code about time delay is in 'self.display.render'
+        """
+        cur_state = self.get_state()
+        snake = [convert_grid_coord_to_screen(grid_coord, BLOCK_SIZE)
+                 for grid_coord in cur_state.snake]
+        food = convert_grid_coord_to_screen(cur_state.food, BLOCK_SIZE)
+        score = cur_state.get_score()
+        game_over = cur_state.is_game_over()
+        self.display.render_and_delay(snake, food, score, game_over)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# test
+from game.game_logic import TestGameLogic
+class TestGame:
+    def __init__(self, display_on=False):
+        # use WIDTH - BLOCK_SIZE to change bottom-right to top-left
+        grid_size = convert_screen_coord_to_grid((WIDTH - BLOCK_SIZE, HEIGHT - BLOCK_SIZE), BLOCK_SIZE)
+        self.logic = TestGameLogic(grid_size[0], grid_size[1])
+        self.display_on = display_on
+        self.display = GameDisplay(width=WIDTH, height=HEIGHT, block_size=BLOCK_SIZE)
+        self.reset()
+
+    def step(self, action: Action) -> None:
+        """
+        Execute a step in the environment based on the given action.
+        """
+        self.logic.step(action)
+        self.display.handle_event() # make it possible to drag pygame window around
+        if self.display_on:
+            self._render_and_delay()
+        return
+    
+    def get_state(self) -> State:
+        """
+        Return the copy of current state.
+        """
+        return self.logic.get_state().copy()
 
     def reset(self) -> None:
         return self.logic.reset()
