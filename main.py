@@ -1,13 +1,39 @@
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
+from collections import deque
 
 from game.main_game import Game
 from agent.base_agent import Agent
 from agent.greedy_agent import GreedyAgent
 from agent.dqn_agent import DQNAgent
-from model.dqn_model import *
-from common.helper import convert_screen_coord_to_grid
-from common.helper import *
+from model.dqn_model import SnakeLinerDQN
+from common.game_elements import *
+from common.states import *
+from common.utils import *
+
+def reward_func(state: State, action: Action, next_state: State):
+    if (next_state.is_game_over()):
+        return -10
+    
+    reward = 0
+
+    # encourage get closer to food
+    head = state.get_snake_head()
+    food = state.get_food()
+    dis = abs(head[0] - food[0]) + abs(head[1] - food[1])
+    next_head = next_state.get_snake_head()
+    next_food = next_state.get_food()
+    next_dis = abs(next_head[0] - next_food[0]) + abs(next_head[1] - next_food[1])
+    reward += (dis - next_dis)
+
+    # score reward
+    cur_score = state.get_score()
+    next_score = next_state.get_score()
+    if (next_score != cur_score):
+        reward = (next_score - cur_score) * 20
+    return reward
+
+
 
 
 def play_with_agent(agent: Agent):
@@ -30,11 +56,19 @@ def play_with_agent(agent: Agent):
             print(f"Times: {game_over_times}, Score: {new_game_state.get_score()}")
             game.reset()
 
-def play_and_learn_with_dqn_agent(agent: DQNAgent, helper_agent: Agent=None, 
-                                  display_rounds=100, helper_episodes=299):
+def play_and_learn_with_dqn_agent(agent: DQNAgent, update_plot_callback=None, 
+                                  helper_agent: Agent=None, 
+                                  display_rounds=100, helper_episodes=59):
+    """
+    Parameters:
+        update_plot_callback: a callback function updating the plot, (float, int) -> None
+    """
     game = Game(display_on=False)
     game_over_times = 0
     episode_losses = []
+    scores_recent_hundred_round = deque(maxlen=100)
+    agent.main_model.train()
+    agent.target_model.eval()
     while True:
         if game_over_times % display_rounds == 0:
             game.set_display_on()
@@ -44,7 +78,8 @@ def play_and_learn_with_dqn_agent(agent: DQNAgent, helper_agent: Agent=None,
         # get (s, a, r, s', done) and update game
         game_state = game.get_state()
 
-        # niko's test: use helper agent to benefit experience at first
+        # use helper agent to benefit experience at first
+        # does it work? i dont know =)
         action = agent.get_action(game_state)
         if helper_agent and game_over_times <= helper_episodes:
             action = helper_agent.get_action(game_state)
@@ -60,117 +95,87 @@ def play_and_learn_with_dqn_agent(agent: DQNAgent, helper_agent: Agent=None,
             episode_losses.append(loss)
 
         if next_state.is_game_over():
-            # print(f"State tensor: \n{next_state.get_state_tensor()}")
-            # print(f"Direction: {next_state.get_direction()}")
-            # print(f"epsilon: {agent.epsilon}")
             game_over_times += 1
-            print(f"Times: {game_over_times}, Score: {next_state.get_score()}")
+
+            # save weights
+            agent.main_model.save()
+
+            # compute average loss and average score 
+            scores_recent_hundred_round.append(next_state.get_score())
+            avg_loss = sum(episode_losses) / len(episode_losses)
+            avg_score = sum(scores_recent_hundred_round) / len(scores_recent_hundred_round)
+
+            print(f"Play times: {game_over_times}, Score: {next_state.get_score()}")
             if episode_losses:
-                print(f"Average loss for this episode: {sum(episode_losses) / len(episode_losses)}")
+                print(f"Average loss: {avg_loss}")
+            print(f"Epsilon: {agent.epsilon}")
+            print(f"Average score current 100 rounds: {avg_score}")
+            print('\n')
+
+            # update the plot
+            if update_plot_callback:
+                update_plot_callback(avg_loss, avg_score)
+
+            # reset
             episode_losses = []
             game.reset()
+            
 
+def create_plotter():
+    plt.ion()
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(6, 6))
+    loss_line, = ax1.plot([], [], 'r-')
+    score_line, = ax2.plot([], [], 'b-')
+    ax1.set_xlabel('Episodes')
+    ax1.set_ylabel('Loss')
+    ax1.set_title('Training Loss')
+    ax2.set_xlabel('Episodes')
+    ax2.set_ylabel('Average score in 100 rounds')
+    ax2.set_title('Game Score')
 
+    all_losses = []
+    all_scores = []
 
+    def update_plot(loss, score):
+        all_losses.append(loss)
+        all_scores.append(score)
+        loss_line.set_data(range(len(all_losses)), all_losses)
+        score_line.set_data(range(len(all_scores)), all_scores)
+        ax1.relim()
+        ax1.autoscale_view()
+        ax2.relim()
+        ax2.autoscale_view()
+        fig.canvas.draw()
+        fig.canvas.flush_events()
 
+    return update_plot
 
+if __name__ == "__main__":
+    # create a callback function to update the figure dynamically
+    update_plot = create_plotter()
 
+    # greedy_agent
+    greedy_agent = GreedyAgent()
 
+    # dqn_agent
+    main_model = SnakeLinerDQN(9, 3)
+    target_model = SnakeLinerDQN(9, 3)
+    dqn_agent = DQNAgent(main_model, target_model)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-from game.main_game import TestGame
-def play_and_learn_with_dqn_agent_in_test_game(agent: DQNAgent, helper_agent: Agent=None, 
-                                  display_rounds=200, helper_episodes=299):
-    game = TestGame(display_on=False)
-    game_over_times = 0
-    episode_losses = []
     while True:
-        if game_over_times % display_rounds == 0:
-            game.set_display_on()
+        user_input = input("Start training from scratch? (y/n): ").lower()
+        if user_input == 'y':
+            print("Starting training from scratch...")
+            break
+        elif user_input == 'n':
+            print("Attempting to load previous model...")
+            if dqn_agent.main_model.load() and dqn_agent.target_model.load():
+                dqn_agent.epsilon = 0.1
+                print("Previous model loaded successfully.")
+            else:
+                print("Failed to load previous model. Starting from scratch...")
+            break
         else:
-            game.set_display_off()
+            print("Invalid input. Please enter 'y' or 'n'.")
 
-        # get (s, a, r, s', done) and update game
-        game_state = game.get_state()
-
-        # niko's test: use helper agent to benefit experience at first
-        action = agent.get_action(game_state)
-        if helper_agent and game_over_times <= helper_episodes:
-            action = helper_agent.get_action(game_state)
-
-        game.step(action)
-        next_state = game.get_state()
-        reward = reward_func(game_state, action, next_state)
-
-        # if reward != 0:
-        #     print(game_state.get_state_tensor())
-        #     print(action)
-        #     print(reward)
-        #     print(next_state.get_state_tensor())
-
-        # learn
-        agent.memorize(game_state, action, reward, next_state, next_state.is_game_over())
-        loss = agent.learn()
-        if loss:
-            episode_losses.append(loss)
-
-        if next_state.is_game_over():
-            game_over_times += 1
-            print(f"Times: {game_over_times}, Score: {next_state.get_score()}")
-            if episode_losses:
-                print(f"Average loss for this episode: {sum(episode_losses) / len(episode_losses)}")
-            # print(f"State tensor: \n{next_state.get_state_tensor()[0]}")
-            # print(f"Direction: {next_state.get_direction()}")
-            print(f"epsilon: {agent.epsilon}")
-
-            episode_losses = []
-            game.reset()
-
-
-def reward_func(state: State, action: Action, next_state: State):
-    if (next_state.is_game_over()):
-        return -4
-    
-    reward = 0
-
-    # encourage get closer to food
-    head = state.get_snake_head()
-    food = state.get_food()
-    dis = abs(head[0] - food[0]) + abs(head[1] - food[1])
-    next_head = next_state.get_snake_head()
-    next_food = next_state.get_food()
-    next_dis = abs(next_head[0] - next_food[0]) + abs(next_head[1] - next_food[1])
-    reward += ((dis - next_dis) / (HEIGHT // BLOCK_SIZE))
-
-    # score reward
-    cur_score = state.get_score()
-    next_score = next_state.get_score()
-    if (next_score != cur_score):
-        reward = (next_score - cur_score) * 15
-    return reward
-
-
-
-
-# greedy_agent
-greedy_agent = GreedyAgent()
-
-# dqn_agent
-main_model = SnakeLinerDQN(9, 3)
-target_model = SnakeLinerDQN(9, 3)
-dqn_agent = DQNAgent(main_model, target_model)
-play_and_learn_with_dqn_agent(dqn_agent)
+    play_and_learn_with_dqn_agent(dqn_agent, update_plot)

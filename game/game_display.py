@@ -1,4 +1,5 @@
 import pygame
+from common.game_elements import *
 
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
@@ -6,10 +7,10 @@ RED = (255, 0, 0)
 LIGHT_BLUE = (0, 127, 255)
 BLUE = (0, 0, 255)
 
-SPEED = 20
+SPEED = 60
 
 class GameDisplay:
-    def __init__(self, width=640, height=480, block_size=20):
+    def __init__(self, width=WIDTH, height=HEIGHT, block_size=BLOCK_SIZE):
         pygame.init()
         self.screen = pygame.display.set_mode((width, height))
         self.clock = pygame.time.Clock()

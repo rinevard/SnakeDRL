@@ -4,12 +4,14 @@ import random
 from collections import deque
 from agent.base_agent import LearningAgent
 from model.dqn_model import *
-from common.helper import *
-from common.helper import convert_action_to_action_idx
+from common.game_elements import *
+from common.states import *
+from common.utils import *
+
 
 class ReplayBuffer():
     """
-    Store experience: tuple[Tensor, int, float, Tensor, bool]
+    Store experience whose type is: tuple[Tensor, int, float, Tensor, bool]
     """
     def __init__(self, capacity) -> None:
         self.buffer = deque(maxlen=capacity)
@@ -41,10 +43,10 @@ class ReplayBuffer():
 
 class DQNAgent(LearningAgent):
     def __init__(self, main_model: SnakeLinerDQN, target_model: SnakeLinerDQN, 
-                 learning_rate=1e-5, gamma=0.99,
-                 epsilon_start=1.0, epsilon_end=0.025, epsilon_delay_time=10000, 
-                 buffer_capacity=2000, batch_size=64, 
-                 main_update_frequency=1, target_update_frequency=200, 
+                 learning_rate=1.5e-4, gamma=0.99,
+                 epsilon_start=1.0, epsilon_end=0.025, epsilon_delay_time=8000, 
+                 buffer_capacity=10000, batch_size=64, 
+                 main_update_frequency=4, target_update_frequency=1000, 
                  actions=[Action.TURN_RIGHT, Action.GO_STRAIGHT, Action.TURN_LEFT]):
         """
         Note:
@@ -128,6 +130,7 @@ class DQNAgent(LearningAgent):
     
     def synchronize_networks(self) -> None:
         self.target_model.load_state_dict(self.main_model.state_dict())
+        self.target_model.eval()
         return
     
     def update_epsilon(self) -> None:
