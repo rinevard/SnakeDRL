@@ -4,7 +4,7 @@
 
 Using DQN to teach AI to play Snake
 
-In a Snake game played on a 32x24 grid, the agent I trained approximately 2000 episodes can achieve a score of around 80 points.
+In a Snake game played on a 32x24 grid, the agent I trained approximately 2000 episodes can achieve a score of around 80 points. And in a snake game played on a 5x5 grid, the agent can sometimes beat the game!
 
 ![alt text](pngs/loss.png)
 ![alt text](pngs/score91.png)
