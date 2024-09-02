@@ -50,7 +50,7 @@ Note: You can also run `main.ipynb` on [Google Colab](https://colab.research.goo
 │ │ └── linear_dqn_model.pth # Model weights
 │ └── dqn_model.py # Neural network used by DQNagent
 │
-├── pngs/ # Image folder
+├── pngs_and_gifs/ # Image folder
 │
 ├── main.ipynb # Main program in colab or jupyter notebook.
 │
