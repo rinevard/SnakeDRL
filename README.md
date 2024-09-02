@@ -16,11 +16,25 @@ pygame, torch, torchvision, matplotlib
 ## Getting Started:
 
 1. Download python and required packages.
+
+   `pip install pygame==2.6.0 torch==2.3.0 torchvision==0.18.0 matplotlib==3.9.2 numpy==1.26.4`
+
+   If you use conda, you can firstly use `conda install pip`, then use `pip install pygame==2.6.0 torch==2.3.0 torchvision==0.18.0 matplotlib==3.9.2 numpy==1.26.4`
+
 2. Clone the repo or download it.
+
+   `git clone https://github.com/rinevard/SnakeRL.git`
+
 3. Navigate to the project directory.
+
+   `cd SnakeRL/`
+
 4. Run `python main.py` in terminal window and train your own snake!
+
 5. (Optional) Visit `common\settings.py` to change hyperparameters and other settings.
+
 6. (Optional) Visit `agent\play_game_with_agent.py` to change the reward function.
+
 7. (Optional) Walk around and change other codes.
 
 Note: You can also run `main.ipynb` on [Google Colab](https://colab.research.google.com). However, some features like dynamic plot updates and game display may not be available in this environment. The core functionality of training the snake AI will still work.
