@@ -1,6 +1,6 @@
 # Ensure that WIDTH and HEIGHT are multiples of BLOCKSIZE
-GAME_WIDTH: int = 640
-GAME_HEIGHT: int = 480
+GAME_WIDTH: int = 100
+GAME_HEIGHT: int = 100
 BLOCK_SIZE: int = 20
 
 # for display settings
@@ -28,3 +28,6 @@ learning_episodes_per_save: int = 50
 epsilon_start: float = 0.8
 epsilon_end: float = 0
 epsilon_decay_steps = 4000
+
+# for game
+addtional_score_when_winning: int = 100

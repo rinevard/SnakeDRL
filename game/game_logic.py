@@ -79,5 +79,5 @@ class GameLogic:
         if available_positions:
             self.game_state.food = random.choice(list(available_positions))
         else:
-            self.game_state.score += 100
+            self.game_state.score += addtional_score_when_winning
             self.game_state.game_over = True
