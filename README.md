@@ -32,7 +32,8 @@ Note: You can also run `main.ipynb` on [Google Colab](https://colab.research.goo
 ├── agent/
 │ ├── base_agent.py # The base agent class
 │ ├── dqn_agent.py # The agent using DQN for learning
-│ └── greedy_agent.py # A simple agent that runs directly towards food
+│ ├── greedy_agent.py # A simple agent that runs directly towards food
+│ └── play_game_with_agent.py # Reward func, play func, play and learn func
 │
 ├── common/
 │ ├── settings.py # Hyperparameters, game size, and game speed
@@ -50,6 +51,8 @@ Note: You can also run `main.ipynb` on [Google Colab](https://colab.research.goo
 │ └── dqn_model.py # Neural network used by DQNagent
 │
 ├── pngs/ # Image folder
+│
+├── main.ipynb # Main program in colab or jupyter notebook.
 │
 └── main.py # Main program, primarily contains user interaction
 ```
