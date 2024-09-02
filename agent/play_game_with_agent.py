@@ -6,6 +6,28 @@ from agent.base_agent import Agent
 from agent.dqn_agent import DQNAgent
 from game.main_game import Game
 from game.states import *
+            
+def reward_func(state: State, action: Action, next_state: State) -> float:
+    if (next_state.is_game_over()):
+        return -300 / state.get_snake_length()
+    
+    reward = 0
+
+    # encourage get closer to food
+    head = state.get_snake_head()
+    food = state.get_food()
+    dis = abs(head[0] - food[0]) + abs(head[1] - food[1])
+    next_head = next_state.get_snake_head()
+    next_food = next_state.get_food()
+    next_dis = abs(next_head[0] - next_food[0]) + abs(next_head[1] - next_food[1])
+    reward += (dis - next_dis)
+
+    # score reward
+    cur_score = state.get_score()
+    next_score = next_state.get_score()
+    if (next_score != cur_score):
+        reward = (next_score - cur_score) * 20 + (0.5 * state.get_snake_length())
+    return reward
 
 def play_with_agent(agent: DQNAgent, 
                     display_rounds=playing_rounds_per_display, 
@@ -113,28 +135,6 @@ def play_and_learn_with_dqn_agent(agent: DQNAgent, total_episodes=learning_total
             # reset
             episode_losses = []
             game.reset()
-            
-def reward_func(state: State, action: Action, next_state: State) -> float:
-    if (next_state.is_game_over()):
-        return -300 / state.get_snake_length()
-    
-    reward = 0
-
-    # encourage get closer to food
-    head = state.get_snake_head()
-    food = state.get_food()
-    dis = abs(head[0] - food[0]) + abs(head[1] - food[1])
-    next_head = next_state.get_snake_head()
-    next_food = next_state.get_food()
-    next_dis = abs(next_head[0] - next_food[0]) + abs(next_head[1] - next_food[1])
-    reward += (dis - next_dis)
-
-    # score reward
-    cur_score = state.get_score()
-    next_score = next_state.get_score()
-    if (next_score != cur_score):
-        reward = (next_score - cur_score) * 20 + (0.5 * state.get_snake_length())
-    return reward
 
 def create_training_plotter():
     plt.ion()
