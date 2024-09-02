@@ -43,6 +43,8 @@ Packages requirement: pygame, torch, torchvision, matplotlib
 
     - [Video Tutorial](https://github.com/patrickloeber/snake-ai-pytorch)
 
+    - [Comparing Different Setups for Reinforcement Learning in Snake](https://davidd-55.github.io/sNNake/)
+
     - [Written Guide: Genetic Algorithm Approach](https://craighaber.github.io/AI-for-Snake-Game/website_files/index.html)
 
     - [Another Genetic Algorithm Approach](https://github.com/arthurdjn/snake-reinforcement-learning)
