@@ -38,7 +38,7 @@ class GameLogic:
         # 3. Check if snake hit the wall
         if (new_head[0] < 0 or new_head[0] > self.grid_width or
             new_head[1] < 0 or new_head[1] > self.grid_height or
-            self.game_state.steps_of_do_nothing >= 4 * (WIDTH // BLOCK_SIZE) * len(self.game_state.snake)):
+            self.game_state.steps_of_do_nothing >= 4 * (GAME_WIDTH // BLOCK_SIZE) * len(self.game_state.snake)):
             self.game_state.game_over = True
             return
 

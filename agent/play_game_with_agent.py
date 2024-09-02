@@ -8,8 +8,8 @@ from game.main_game import Game
 from game.states import *
 
 def play_with_agent(agent: DQNAgent, 
-                    display_rounds=display_rounds_when_playing, 
-                    total_rounds=total_rounds_when_playing):
+                    display_rounds=playing_display_rounds, 
+                    total_rounds=playing_total_rounds):
     print(f"Play for {total_rounds} rounds and coumpute the average score...")
     agent.enter_eval_mode()
     game = Game(display_on=False)
@@ -37,13 +37,13 @@ def play_with_agent(agent: DQNAgent,
     print(f"\nAverage score in {total_rounds} rounds: {sum(scores) / total_rounds}\n")
     return
 
-def play_and_learn_with_dqn_agent(agent: DQNAgent, total_episodes=total_episodes_when_learning, 
+def play_and_learn_with_dqn_agent(agent: DQNAgent, total_episodes=learning_total_episodes, 
                                   update_plot_callback=None, 
                                   helper_agent: Agent=None, 
-                                  display_rounds=display_rounds_when_learning, 
+                                  display_rounds=learning_display_rounds, 
                                   helper_episodes=59, 
                                   epsilon_start=epsilon_start, epsilon_end=epsilon_end,
-                                  epsilon_decay_steps=time_for_epsilon_to_delay_to_end):
+                                  epsilon_decay_steps=epsilon_decay_steps):
     """
     Parameters:
         update_plot_callback: a callback function updating the plot, (float, int) -> None

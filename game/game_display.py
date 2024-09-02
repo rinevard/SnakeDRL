@@ -9,7 +9,7 @@ LIGHT_BLUE = (0, 127, 255)
 BLUE = (0, 0, 255)
 
 class GameDisplay:
-    def __init__(self, width=WIDTH, height=HEIGHT, block_size=BLOCK_SIZE):
+    def __init__(self, width=GAME_WIDTH, height=GAME_HEIGHT, block_size=BLOCK_SIZE):
         pygame.init()
         self.screen = pygame.display.set_mode((width, height))
         self.clock = pygame.time.Clock()
@@ -54,7 +54,7 @@ class GameDisplay:
             self.screen.blit(game_over_text, text_rect)
         
         pygame.display.flip()
-        self.clock.tick(SPEED)  # 控制帧率
+        self.clock.tick(GAME_SPEED)  # 控制帧率
 
     def close(self):
         pygame.display.quit()

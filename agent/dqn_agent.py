@@ -45,7 +45,7 @@ class ReplayBuffer():
 class DQNAgent(LearningAgent):
     def __init__(self, main_model: SnakeLinerDQN, target_model: SnakeLinerDQN, 
                  learning_rate=learning_rate, gamma=gamma,
-                 epsilon_start=epsilon_start, epsilon_end=epsilon_end, epsilon_delay_time=time_for_epsilon_to_delay_to_end, 
+                 epsilon_start=epsilon_start, epsilon_end=epsilon_end, epsilon_delay_time=epsilon_decay_steps, 
                  buffer_capacity=buffer_capacity, batch_size=batch_size, 
                  main_update_frequency=main_update_frequency, target_update_frequency=target_update_frequency, 
                  actions=[Action.TURN_RIGHT, Action.GO_STRAIGHT, Action.TURN_LEFT]):
@@ -144,7 +144,7 @@ class DQNAgent(LearningAgent):
     
     def enter_train_mode(self, epsilon_start=epsilon_start, 
                         epsilon_end=epsilon_end, 
-                        epsilon_decay_steps=time_for_epsilon_to_delay_to_end):
+                        epsilon_decay_steps=epsilon_decay_steps):
         self.main_model.train()
         self.target_model.eval()
         self.epsilon = epsilon_start

@@ -7,8 +7,8 @@ class State:
                  food: tuple[int, int], 
                  score: int, 
                  game_over: bool, 
-                 grid_width=(WIDTH - BLOCK_SIZE) // BLOCK_SIZE, 
-                 grid_height=(HEIGHT - BLOCK_SIZE) // BLOCK_SIZE) -> None:
+                 grid_width=(GAME_WIDTH - BLOCK_SIZE) // BLOCK_SIZE, 
+                 grid_height=(GAME_HEIGHT - BLOCK_SIZE) // BLOCK_SIZE) -> None:
         """
         Parameters:
             snake: List of coordinates representing the snake's body.

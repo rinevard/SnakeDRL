@@ -7,10 +7,10 @@ from game.states import *
 class Game:
     def __init__(self, display_on=False):
         # use WIDTH - BLOCK_SIZE to change bottom-right to top-left
-        grid_size = convert_screen_coord_to_grid((WIDTH - BLOCK_SIZE, HEIGHT - BLOCK_SIZE), BLOCK_SIZE)
+        grid_size = convert_screen_coord_to_grid((GAME_WIDTH - BLOCK_SIZE, GAME_HEIGHT - BLOCK_SIZE), BLOCK_SIZE)
         self.logic = GameLogic(grid_size[0], grid_size[1])
         self.display_on = display_on
-        self.display = GameDisplay(width=WIDTH, height=HEIGHT, block_size=BLOCK_SIZE)
+        self.display = GameDisplay(width=GAME_WIDTH, height=GAME_HEIGHT, block_size=BLOCK_SIZE)
         self.reset()
 
     def step(self, action: Action) -> None:

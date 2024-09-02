@@ -70,14 +70,14 @@ def play_mode(dqn_agent: DQNAgent):
     """
     if load_model(dqn_agent):
         print("Previous model loaded successfully.")
-        play_with_agent(dqn_agent, display_rounds=display_rounds_when_playing, 
-                        total_rounds=total_rounds_when_playing)
+        play_with_agent(dqn_agent, display_rounds=playing_display_rounds, 
+                        total_rounds=playing_total_rounds)
     else:
         prompt = "Without loaded weights, the agent's performance will be poor. Continue? (y/n): "
         if confirm_action(prompt):
             print("Continuing with untrained agent...")
-            play_with_agent(dqn_agent, display_rounds=display_rounds_when_playing, 
-                            total_rounds=total_rounds_when_playing)
+            play_with_agent(dqn_agent, display_rounds=playing_display_rounds, 
+                            total_rounds=playing_total_rounds)
         else:
             print("Returning to mode selection...")
             return False
@@ -93,12 +93,12 @@ def learn_and_play_mode(dqn_agent: DQNAgent, update_plot):
         else:
             print("Failed to load previous model. Starting from scratch...")
     
-    play_and_learn_with_dqn_agent(dqn_agent, total_episodes=total_episodes_when_learning, 
+    play_and_learn_with_dqn_agent(dqn_agent, total_episodes=learning_total_episodes, 
                                   update_plot_callback=update_plot, 
-                                  display_rounds=display_rounds_when_learning, 
+                                  display_rounds=learning_display_rounds, 
                                   epsilon_start=epsilon_start, 
                                   epsilon_end=epsilon_end, 
-                                  epsilon_decay_steps=time_for_epsilon_to_delay_to_end)
+                                  epsilon_decay_steps=epsilon_decay_steps)
 
 def load_model(dqn_agent: DQNAgent):
     """

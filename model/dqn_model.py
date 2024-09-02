@@ -9,13 +9,13 @@ class SnakeLinerDQN(nn.Module):
     def __init__(self, input_size, output_size) -> None:
         super().__init__()
         self.fc = nn.Sequential(
-            nn.Linear(input_size, hidden_layer_size), 
+            nn.Linear(input_size, dqn_hidden_layer_size), 
             nn.ReLU(), 
-            nn.Linear(hidden_layer_size, hidden_layer_size), 
+            nn.Linear(dqn_hidden_layer_size, dqn_hidden_layer_size), 
             nn.ReLU(), 
-            nn.Linear(hidden_layer_size, hidden_layer_size), 
+            nn.Linear(dqn_hidden_layer_size, dqn_hidden_layer_size), 
             nn.ReLU(), 
-            nn.Linear(hidden_layer_size, output_size)
+            nn.Linear(dqn_hidden_layer_size, output_size)
         )
         self._initialize_weights()
 
