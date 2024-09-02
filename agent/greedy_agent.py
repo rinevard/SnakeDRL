@@ -1,4 +1,4 @@
-from common.game_elements import *
+from common.constants_and_enums import *
 from game.states import *
 from common.utils import *
 from agent.base_agent import Agent

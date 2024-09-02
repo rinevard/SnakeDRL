@@ -1,5 +1,5 @@
 import random
-from common.game_elements import *
+from common.constants_and_enums import *
 from game.states import *
 from common.utils import *
 
@@ -13,14 +13,6 @@ class GameLogic:
         self.grid_height = grid_height
         self.game_state: State = None
         self.reset()
-
-    def _place_food(self) -> None:
-        while True:
-            x = random.randint(0, self.grid_width)
-            y = random.randint(0, self.grid_height)
-            if (x, y) not in self.game_state.snake:
-                self.game_state.food = (x, y)
-                break
 
     def step(self, action: Action) -> None:
         """
@@ -79,3 +71,11 @@ class GameLogic:
         self.game_state = State(snake, direction, None, score, game_over)
         self.game_state.steps_of_do_nothing = 0
         self._place_food()
+
+    def _place_food(self) -> None:
+        while True:
+            x = random.randint(0, self.grid_width)
+            y = random.randint(0, self.grid_height)
+            if (x, y) not in self.game_state.snake:
+                self.game_state.food = (x, y)
+                break

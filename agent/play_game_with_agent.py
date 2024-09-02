@@ -1,10 +1,10 @@
 import matplotlib.pyplot as plt
 from collections import deque
 
-from game.main_game import Game
 from agent.base_agent import Agent
 from agent.dqn_agent import DQNAgent
-from common.game_elements import *
+from game.main_game import Game
+from common.constants_and_enums import *
 from game.states import *
 
 def reward_func(state: State, action: Action, next_state: State):
@@ -31,10 +31,11 @@ def reward_func(state: State, action: Action, next_state: State):
 
 def play_with_agent(agent: DQNAgent, 
                     display_rounds: int=25, total_rounds: int=100):
+    print(f"Play for {total_rounds} rounds and coumpute the average score...")
     agent.enter_eval_mode()
     game = Game(display_on=False)
     game_over_times = 0
-    total_score = 0
+    scores = []
     while game_over_times < total_rounds:
         if game_over_times % display_rounds == 0:
             game.set_display_on()
@@ -50,10 +51,11 @@ def play_with_agent(agent: DQNAgent,
         if new_game_state.is_game_over():
             game_over_times += 1
             print(f"Times: {game_over_times}, Score: {new_game_state.get_score()}\n")
-            total_score += new_game_state.get_score()
+            scores.append(new_game_state.get_score())
             game.reset()
     
-    print(f"\nAverage score in {total_rounds} rounds: {total_score / total_rounds}\n")
+    print(f"\nHighest score in {total_rounds} rounds: {max(scores)}")
+    print(f"\nAverage score in {total_rounds} rounds: {sum(scores) / total_rounds}\n")
     return
 
 def play_and_learn_with_dqn_agent(agent: DQNAgent, total_episodes: int=99999, 
@@ -107,7 +109,7 @@ def play_and_learn_with_dqn_agent(agent: DQNAgent, total_episodes: int=99999,
 
             # save weights
             agent.main_model.save()
-            print(f"Feel free to close the terminal window.")
+            print(f"Feel free to press Ctrl+C to terminate the program or close the window")
 
             # compute average loss and average score 
             scores_recent_hundred_round.append(next_state.get_score())

@@ -1,5 +1,5 @@
 import pygame
-from common.game_elements import *
+from common.constants_and_enums import *
 
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)

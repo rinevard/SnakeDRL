@@ -63,7 +63,7 @@ def main():
         else:
             print("Invalid input. Please enter 'a' for Play or 'b' for Learn and Play.")
 
-def play_mode(dqn_agent):
+def play_mode(dqn_agent: DQNAgent):
     """
     Return True if agent start playing else False.
     """
@@ -93,8 +93,9 @@ def learn_and_play_mode(dqn_agent: DQNAgent, update_plot):
     epsilon_start = 0.8
     if load_successfully:
         epsilon_start = 0.2
+    
     play_and_learn_with_dqn_agent(dqn_agent, epsilon_start=epsilon_start, 
-                                  update_plot_callback=update_plot)
+                                   update_plot_callback=update_plot)
 
 def load_model(dqn_agent: DQNAgent):
     """
@@ -107,7 +108,7 @@ def load_model(dqn_agent: DQNAgent):
         print("Failed to load previous model.")
         return False
 
-def confirm_action(prompt):
+def confirm_action(prompt: str):
     """
     If player input 'y' then return True, if input 'n' then return False, else loop.
     """

@@ -4,7 +4,7 @@ import random
 from collections import deque
 from agent.base_agent import LearningAgent
 from model.dqn_model import *
-from common.game_elements import *
+from common.constants_and_enums import *
 from game.states import *
 from common.utils import *
 

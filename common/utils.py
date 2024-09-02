@@ -1,5 +1,5 @@
 import torch
-from common.game_elements import *
+from common.constants_and_enums import *
 
 def convert_direction_to_tuple(direction: Direction) -> tuple[int, int]:
     """
