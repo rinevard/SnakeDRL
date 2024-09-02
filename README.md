@@ -4,10 +4,10 @@
 
 Using DQN to teach AI to play Snake
 
-In a Snake game played on a 32x24 grid, the agent I trained over approximately 2000 episodes can achieve a score of around 70 points.
+In a Snake game played on a 32x24 grid, the agent I trained approximately 2000 episodes can achieve a score of around 80 points.
 
 ![alt text](pngs/loss.png)
-![alt text](pngs/score106.png)
+![alt text](pngs/score91.png)
 
 ## Dependencies:
 
@@ -15,11 +15,13 @@ pygame, torch, torchvision, matplotlib
 
 ## Getting Started:
 
-1. Clone the repo or download it.
-2. To change hyperparameters or settings, visit `common\settings.py`.
-3. The reward function is in `agent\play_game_with_agent.py`.
-4. Feel free to walk around and change other codes.
-5. Run `python main.py` in terminal window and train your own snake!
+1. Download python and required packages.
+2. Clone the repo or download it.
+3. Navigate to the project directory.
+4. Run `python main.py` in terminal window and train your own snake!
+5. (optinal) Visit `common\settings.py` to change hyperparameters or other settings.
+6. (optinal) Visit `agent\play_game_with_agent.py` to change the reward function.
+7. (optinal) Walk around and change other codes.
 
 ## File Structure:
 
@@ -76,7 +78,7 @@ pygame, torch, torchvision, matplotlib
     - [5:6] Steps of doing nothing (the agent would lose if this value is too big)
     - [6:15] Danger distances in three directions (right, straight, left) for each possible next move
 
-2.  Why not use CNN and just represent the state with a matrix?
+2.  Why not use CNN and represent the state with a matrix?
 
     At first I tried to represent the state with a tensor whose shape is (channels, grid_width, grid_height) and use CNN as the model, but the agent seems to learn nothing. Probably the reason is that there are too many states for the agent.
 

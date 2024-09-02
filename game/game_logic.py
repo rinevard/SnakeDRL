@@ -74,9 +74,10 @@ class GameLogic:
         self._place_food()
 
     def _place_food(self) -> None:
-        while True:
-            x = random.randint(0, self.grid_width)
-            y = random.randint(0, self.grid_height)
-            if (x, y) not in self.game_state.snake:
-                self.game_state.food = (x, y)
-                break
+        available_positions = set((x, y) for x in range(self.grid_width + 1) 
+                                for y in range(self.grid_height + 1)) - set(self.game_state.snake)
+        if available_positions:
+            self.game_state.food = random.choice(list(available_positions))
+        else:
+            self.game_state.score += 100
+            self.game_state.game_over = True

@@ -1,3 +1,5 @@
+import torch
+
 from common.settings import *
 from agent.play_game_with_agent import *
 from agent.dqn_agent import DQNAgent
@@ -43,11 +45,11 @@ def main():
                         └─── Fail
                             └─── Start new training
     """
-
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     # dqn_agent
-    main_model = SnakeLinerDQN(15, 3)
-    target_model = SnakeLinerDQN(15, 3)
-    dqn_agent = DQNAgent(main_model, target_model)
+    main_model = SnakeLinerDQN(15, 3).to(device=device)
+    target_model = SnakeLinerDQN(15, 3).to(device=device)
+    dqn_agent = DQNAgent(main_model, target_model, device=device)
     while True:
         user_input = input("Choose mode: (a) Play or (b) Learn and Play (a/b): ").lower()
         if user_input in ['a', 'play']:
@@ -70,13 +72,13 @@ def play_mode(dqn_agent: DQNAgent):
     """
     if load_model(dqn_agent):
         print("Previous model loaded successfully.")
-        play_with_agent(dqn_agent, display_rounds=playing_display_rounds, 
+        play_with_agent(dqn_agent, display_rounds=playing_rounds_per_display, 
                         total_rounds=playing_total_rounds)
     else:
         prompt = "Without loaded weights, the agent's performance will be poor. Continue? (y/n): "
         if confirm_action(prompt):
             print("Continuing with untrained agent...")
-            play_with_agent(dqn_agent, display_rounds=playing_display_rounds, 
+            play_with_agent(dqn_agent, display_rounds=playing_rounds_per_display, 
                             total_rounds=playing_total_rounds)
         else:
             print("Returning to mode selection...")
@@ -95,7 +97,7 @@ def learn_and_play_mode(dqn_agent: DQNAgent, update_plot):
     
     play_and_learn_with_dqn_agent(dqn_agent, total_episodes=learning_total_episodes, 
                                   update_plot_callback=update_plot, 
-                                  display_rounds=learning_display_rounds, 
+                                  display_rounds=learning_episodes_per_display, 
                                   epsilon_start=epsilon_start, 
                                   epsilon_end=epsilon_end, 
                                   epsilon_decay_steps=epsilon_decay_steps)

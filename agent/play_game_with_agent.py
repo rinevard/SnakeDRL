@@ -8,7 +8,7 @@ from game.main_game import Game
 from game.states import *
 
 def play_with_agent(agent: DQNAgent, 
-                    display_rounds=playing_display_rounds, 
+                    display_rounds=playing_rounds_per_display, 
                     total_rounds=playing_total_rounds):
     print(f"Play for {total_rounds} rounds and coumpute the average score...")
     agent.enter_eval_mode()
@@ -40,7 +40,7 @@ def play_with_agent(agent: DQNAgent,
 def play_and_learn_with_dqn_agent(agent: DQNAgent, total_episodes=learning_total_episodes, 
                                   update_plot_callback=None, 
                                   helper_agent: Agent=None, 
-                                  display_rounds=learning_display_rounds, 
+                                  display_rounds=learning_episodes_per_display, 
                                   helper_episodes=59, 
                                   epsilon_start=epsilon_start, epsilon_end=epsilon_end,
                                   epsilon_decay_steps=epsilon_decay_steps):
@@ -52,15 +52,15 @@ def play_and_learn_with_dqn_agent(agent: DQNAgent, total_episodes=learning_total
                            epsilon_end=epsilon_end,
                            epsilon_decay_steps=epsilon_decay_steps)
     game = Game(display_on=False)
-    game_over_times = 0
+    episodes = 0
     episode_losses = []
     avg_loss = None
     avg_score = None
     scores_recent_hundred_round = deque(maxlen=100)
     agent.main_model.train()
     agent.target_model.eval()
-    while game_over_times < total_episodes:
-        if game_over_times % display_rounds == 0:
+    while episodes < total_episodes:
+        if episodes % display_rounds == 0:
             game.set_display_on()
         else:
             game.set_display_off()
@@ -71,7 +71,7 @@ def play_and_learn_with_dqn_agent(agent: DQNAgent, total_episodes=learning_total
         # use helper agent to benefit experience at first
         # does it work? i dont know =)
         action = agent.get_action(game_state)
-        if helper_agent and game_over_times <= helper_episodes:
+        if helper_agent and episodes <= helper_episodes:
             action = helper_agent.get_action(game_state)
 
         game.step(action)
@@ -85,17 +85,18 @@ def play_and_learn_with_dqn_agent(agent: DQNAgent, total_episodes=learning_total
             episode_losses.append(loss)
 
         if next_state.is_game_over():
-            game_over_times += 1
+            episodes += 1
 
             # save weights
-            agent.main_model.save()
-            print(f"Feel free to press Ctrl+C to terminate the program or close the window")
+            if episodes % learning_episodes_per_save == 0:
+                agent.main_model.save()
+                print(f"Feel free to press Ctrl+C to terminate the program or close the window")
 
             # compute average loss and average score 
             scores_recent_hundred_round.append(next_state.get_score())
 
 
-            print(f"Play times: {game_over_times}, Score: {next_state.get_score()}")
+            print(f"Play times: {episodes}, Score: {next_state.get_score()}")
             print(f"Epsilon: {agent.epsilon}")
             if episode_losses:
                 avg_loss = sum(episode_losses) / len(episode_losses)

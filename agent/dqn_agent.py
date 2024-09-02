@@ -43,7 +43,7 @@ class ReplayBuffer():
         return len(self.buffer)
 
 class DQNAgent(LearningAgent):
-    def __init__(self, main_model: SnakeLinerDQN, target_model: SnakeLinerDQN, 
+    def __init__(self, main_model: SnakeLinerDQN, target_model: SnakeLinerDQN, device, 
                  learning_rate=learning_rate, gamma=gamma,
                  epsilon_start=epsilon_start, epsilon_end=epsilon_end, epsilon_delay_time=epsilon_decay_steps, 
                  buffer_capacity=buffer_capacity, batch_size=batch_size, 
@@ -53,6 +53,8 @@ class DQNAgent(LearningAgent):
         Note:
         num_actions of 'main_model' and 'target_model' must be equal to len('actions')
         """
+        self.device = device
+        print(f"Agent initialized on device: {self.device}")
         self.epsilon_decay_steps = (epsilon_start - epsilon_end) / epsilon_delay_time
         self.batch_size = batch_size
         self.replay_buffer = ReplayBuffer(buffer_capacity)
@@ -77,7 +79,7 @@ class DQNAgent(LearningAgent):
         else:
             with torch.no_grad():
                 # shape: (9, )
-                state_tensor = state.get_state_tensor()
+                state_tensor = state.get_state_tensor().to(device=self.device)
                 # shape: (1, 3)
                 q_values = self.main_model(state_tensor.unsqueeze(dim=0))
                 return self.actions[torch.argmax(q_values).item()]
@@ -86,10 +88,11 @@ class DQNAgent(LearningAgent):
         """"
         Remember (s, a, r, s', done), which would be used for method 'learn'.
         """
-        s = state.get_state_tensor()
+        # save GPU memory
+        s = state.get_state_tensor().cpu()
         a = convert_action_to_action_idx(action)
         r = reward
-        s_new = next_state.get_state_tensor()
+        s_new = next_state.get_state_tensor().cpu()
         exprience = (s, a, r, s_new, done)
         self.replay_buffer.add(exprience)
         return
@@ -104,11 +107,11 @@ class DQNAgent(LearningAgent):
         # tensor, int, float, tensor, bool
         expriences = self.replay_buffer.sample(self.batch_size)
         states, actions, rewards, next_states, dones = zip(*expriences)
-        states = torch.stack(states)
-        actions = torch.tensor(actions, dtype=torch.int64)  
-        rewards = torch.tensor(rewards, dtype=torch.float32)
-        next_states = torch.stack(next_states)
-        dones = torch.tensor(dones, dtype=torch.float32)
+        states = torch.stack(states).to(device=self.device)
+        actions = torch.tensor(actions, dtype=torch.int64).to(device=self.device)
+        rewards = torch.tensor(rewards, dtype=torch.float32).to(device=self.device)
+        next_states = torch.stack(next_states).to(device=self.device)
+        dones = torch.tensor(dones, dtype=torch.float32).to(device=self.device)
 
         # use 'gather' to get corresponding q-values
         predict_q_values: torch.Tensor = self.main_model(states).gather(dim=1, index=actions.unsqueeze(1))
