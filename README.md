@@ -19,9 +19,11 @@ pygame, torch, torchvision, matplotlib
 2. Clone the repo or download it.
 3. Navigate to the project directory.
 4. Run `python main.py` in terminal window and train your own snake!
-5. (optinal) Visit `common\settings.py` to change hyperparameters or other settings.
-6. (optinal) Visit `agent\play_game_with_agent.py` to change the reward function.
-7. (optinal) Walk around and change other codes.
+5. (optional) Visit `common\settings.py` to change hyperparameters and other settings.
+6. (optional) Visit `agent\play_game_with_agent.py` to change the reward function.
+7. (optional) Walk around and change other codes.
+
+Note: You can also run `main.ipynb` on [Google Colab](https://colab.research.google.com). However, some features like dynamic plot updates and game display may not be available in this environment. The core functionality of training the snake AI will still work.
 
 ## File Structure:
 
