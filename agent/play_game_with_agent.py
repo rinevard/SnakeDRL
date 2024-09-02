@@ -1,36 +1,15 @@
 import matplotlib.pyplot as plt
 from collections import deque
 
+from common.settings import *
 from agent.base_agent import Agent
 from agent.dqn_agent import DQNAgent
 from game.main_game import Game
-from common.constants_and_enums import *
 from game.states import *
 
-def reward_func(state: State, action: Action, next_state: State):
-    if (next_state.is_game_over()):
-        return -300 / state.get_snake_length()
-    
-    reward = 0
-
-    # encourage get closer to food
-    head = state.get_snake_head()
-    food = state.get_food()
-    dis = abs(head[0] - food[0]) + abs(head[1] - food[1])
-    next_head = next_state.get_snake_head()
-    next_food = next_state.get_food()
-    next_dis = abs(next_head[0] - next_food[0]) + abs(next_head[1] - next_food[1])
-    reward += (dis - next_dis)
-
-    # score reward
-    cur_score = state.get_score()
-    next_score = next_state.get_score()
-    if (next_score != cur_score):
-        reward = (next_score - cur_score) * 20 + (0.5 * state.get_snake_length())
-    return reward
-
 def play_with_agent(agent: DQNAgent, 
-                    display_rounds: int=25, total_rounds: int=100):
+                    display_rounds=display_rounds_when_playing, 
+                    total_rounds=total_rounds_when_playing):
     print(f"Play for {total_rounds} rounds and coumpute the average score...")
     agent.enter_eval_mode()
     game = Game(display_on=False)
@@ -58,12 +37,13 @@ def play_with_agent(agent: DQNAgent,
     print(f"\nAverage score in {total_rounds} rounds: {sum(scores) / total_rounds}\n")
     return
 
-def play_and_learn_with_dqn_agent(agent: DQNAgent, total_episodes: int=99999, 
+def play_and_learn_with_dqn_agent(agent: DQNAgent, total_episodes=total_episodes_when_learning, 
                                   update_plot_callback=None, 
                                   helper_agent: Agent=None, 
-                                  display_rounds=300, helper_episodes=59, 
-                                  epsilon_start=0.8, epsilon_end=0.025,
-                                  epsilon_decay_steps=10000):
+                                  display_rounds=display_rounds_when_learning, 
+                                  helper_episodes=59, 
+                                  epsilon_start=epsilon_start, epsilon_end=epsilon_end,
+                                  epsilon_decay_steps=time_for_epsilon_to_delay_to_end):
     """
     Parameters:
         update_plot_callback: a callback function updating the plot, (float, int) -> None
@@ -133,6 +113,27 @@ def play_and_learn_with_dqn_agent(agent: DQNAgent, total_episodes: int=99999,
             episode_losses = []
             game.reset()
             
+def reward_func(state: State, action: Action, next_state: State) -> float:
+    if (next_state.is_game_over()):
+        return -300 / state.get_snake_length()
+    
+    reward = 0
+
+    # encourage get closer to food
+    head = state.get_snake_head()
+    food = state.get_food()
+    dis = abs(head[0] - food[0]) + abs(head[1] - food[1])
+    next_head = next_state.get_snake_head()
+    next_food = next_state.get_food()
+    next_dis = abs(next_head[0] - next_food[0]) + abs(next_head[1] - next_food[1])
+    reward += (dis - next_dis)
+
+    # score reward
+    cur_score = state.get_score()
+    next_score = next_state.get_score()
+    if (next_score != cur_score):
+        reward = (next_score - cur_score) * 20 + (0.5 * state.get_snake_length())
+    return reward
 
 def create_training_plotter():
     plt.ion()

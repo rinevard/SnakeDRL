@@ -1,5 +1,7 @@
 # SnakeRL
 
+## Overview
+
 Using DQN to teach AI to play Snake
 
 In a Snake game played on a 32x24 grid, the agent I trained over approximately 2000 episodes can achieve a score of around 70 points.
@@ -7,7 +9,46 @@ In a Snake game played on a 32x24 grid, the agent I trained over approximately 2
 ![alt text](pngs/loss.png)
 ![alt text](pngs/score106.png)
 
-Packages requirement: pygame, torch, torchvision, matplotlib
+## Dependencies:
+
+pygame, torch, torchvision, matplotlib
+
+## Getting Started:
+
+1. Clone the repo or download it.
+2. To change hyperparameters or settings, visit `common\settings.py`.
+3. The reward function is in `agent\play_game_with_agent.py`.
+4. Feel free to walk around and change other codes.
+5. Run `python main.py` in terminal window and train your own snake!
+
+## File Structure:
+
+```
+.
+├── agent/
+│ ├── base_agent.py # The base agent class
+│ ├── dqn_agent.py # The agent using DQN for learning
+│ └── greedy_agent.py # A simple agent that runs directly towards food
+│
+├── common/
+│ ├── settings.py # Hyperparameters, game size, and game speed
+│ └── utils.py # Helper functions
+│
+├── game/
+│ ├── game_display.py # Game display
+│ ├── game_logic.py # Game logic
+│ ├── main_game.py # Integrates game_display and game_logic
+│ └── states.py # Game state and corresponding state tensor
+│
+├── model/
+│ ├── weights/
+│ │ └── linear_dqn_model.pth # Model weights
+│ └── dqn_model.py # Neural network used by DQNagent
+│
+├── pngs/ # Image folder
+│
+└── main.py # Main program, primarily contains user interaction
+```
 
 ## Some problems you might what to ask
 
@@ -49,7 +90,7 @@ Packages requirement: pygame, torch, torchvision, matplotlib
 
     - [Another Genetic Algorithm Approach](https://github.com/arthurdjn/snake-reinforcement-learning)
 
-## Known Issue
+## Known Issues
 
 ### Fatal Error on Window Resizing
 
@@ -58,3 +99,7 @@ The error message reads as follows:
 Fatal Python error: PyEval_RestoreThread: the function must be called with the GIL held, after Python initialization and before Python finalization, but the GIL is released (the current Python thread state is NULL)
 
 To avoid this error, please do not resize the figure window created by matplotlib.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

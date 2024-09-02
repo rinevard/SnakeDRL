@@ -1,3 +1,4 @@
+from common.settings import *
 from agent.play_game_with_agent import *
 from agent.dqn_agent import DQNAgent
 from model.dqn_model import SnakeLinerDQN
@@ -68,34 +69,36 @@ def play_mode(dqn_agent: DQNAgent):
     Return True if agent start playing else False.
     """
     if load_model(dqn_agent):
-        play_with_agent(dqn_agent)
+        print("Previous model loaded successfully.")
+        play_with_agent(dqn_agent, display_rounds=display_rounds_when_playing, 
+                        total_rounds=total_rounds_when_playing)
     else:
         prompt = "Without loaded weights, the agent's performance will be poor. Continue? (y/n): "
         if confirm_action(prompt):
             print("Continuing with untrained agent...")
-            play_with_agent(dqn_agent)
+            play_with_agent(dqn_agent, display_rounds=display_rounds_when_playing, 
+                            total_rounds=total_rounds_when_playing)
         else:
             print("Returning to mode selection...")
             return False
     return True
 
 def learn_and_play_mode(dqn_agent: DQNAgent, update_plot):
-    load_successfully = False
     if confirm_action("Start training from scratch? (y/n): "):
         print("Starting training from scratch...")
     else:
         print("Attempting to load previous model...")
         if dqn_agent.main_model.load() and dqn_agent.target_model.load():
-            load_successfully = True
             print("Previous model loaded successfully.")
         else:
             print("Failed to load previous model. Starting from scratch...")
-    epsilon_start = 0.8
-    if load_successfully:
-        epsilon_start = 0.2
     
-    play_and_learn_with_dqn_agent(dqn_agent, epsilon_start=epsilon_start, 
-                                   update_plot_callback=update_plot)
+    play_and_learn_with_dqn_agent(dqn_agent, total_episodes=total_episodes_when_learning, 
+                                  update_plot_callback=update_plot, 
+                                  display_rounds=display_rounds_when_learning, 
+                                  epsilon_start=epsilon_start, 
+                                  epsilon_end=epsilon_end, 
+                                  epsilon_decay_steps=time_for_epsilon_to_delay_to_end)
 
 def load_model(dqn_agent: DQNAgent):
     """

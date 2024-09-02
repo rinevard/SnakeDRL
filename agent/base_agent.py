@@ -1,4 +1,4 @@
-from common.constants_and_enums import *
+from common.settings import *
 from game.states import *
 
 class Agent():

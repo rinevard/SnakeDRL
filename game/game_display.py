@@ -1,13 +1,12 @@
 import pygame
-from common.constants_and_enums import *
+
+from common.settings import *
 
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 RED = (255, 0, 0)
 LIGHT_BLUE = (0, 127, 255)
 BLUE = (0, 0, 255)
-
-SPEED = 60
 
 class GameDisplay:
     def __init__(self, width=WIDTH, height=HEIGHT, block_size=BLOCK_SIZE):

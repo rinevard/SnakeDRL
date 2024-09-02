@@ -1,8 +1,8 @@
+from common.settings import *
+from common.utils import *
 from game.game_display import GameDisplay
 from game.game_logic import GameLogic
-from common.constants_and_enums import *
 from game.states import *
-from common.utils import *
 
 class Game:
     def __init__(self, display_on=False):

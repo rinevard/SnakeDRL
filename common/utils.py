@@ -1,5 +1,17 @@
 import torch
-from common.constants_and_enums import *
+from enum import Enum
+from common.settings import *
+
+class Action(Enum):
+    TURN_RIGHT = 0
+    GO_STRAIGHT = 1
+    TURN_LEFT = 2
+
+class Direction(Enum):
+    UP = (0, -1)
+    DOWN = (0, 1)
+    RIGHT = (1, 0)
+    LEFT = (-1, 0)
 
 def convert_direction_to_tuple(direction: Direction) -> tuple[int, int]:
     """

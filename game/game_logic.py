@@ -1,7 +1,8 @@
 import random
-from common.constants_and_enums import *
-from game.states import *
+
+from common.settings import *
 from common.utils import *
+from game.states import *
 
 class GameLogic:
     def __init__(self, grid_width: int, grid_height: int) -> None:

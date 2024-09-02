@@ -3,18 +3,19 @@ import torch
 import torch.nn as nn
 import torch.nn.init as init
 
+from common.settings import *
+
 class SnakeLinerDQN(nn.Module):
     def __init__(self, input_size, output_size) -> None:
         super().__init__()
-        mid_size = 256
         self.fc = nn.Sequential(
-            nn.Linear(input_size, mid_size), 
+            nn.Linear(input_size, hidden_layer_size), 
             nn.ReLU(), 
-            nn.Linear(mid_size, mid_size), 
+            nn.Linear(hidden_layer_size, hidden_layer_size), 
             nn.ReLU(), 
-            nn.Linear(mid_size, mid_size), 
+            nn.Linear(hidden_layer_size, hidden_layer_size), 
             nn.ReLU(), 
-            nn.Linear(mid_size, output_size)
+            nn.Linear(hidden_layer_size, output_size)
         )
         self._initialize_weights()
 

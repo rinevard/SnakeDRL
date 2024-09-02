@@ -2,11 +2,12 @@ import torch
 import torch.nn.functional as F
 import random
 from collections import deque
+
+from common.settings import *
+from common.utils import *
 from agent.base_agent import LearningAgent
 from model.dqn_model import *
-from common.constants_and_enums import *
 from game.states import *
-from common.utils import *
 
 
 class ReplayBuffer():
@@ -43,10 +44,10 @@ class ReplayBuffer():
 
 class DQNAgent(LearningAgent):
     def __init__(self, main_model: SnakeLinerDQN, target_model: SnakeLinerDQN, 
-                 learning_rate=1.5e-4, gamma=0.99,
-                 epsilon_start=1.0, epsilon_end=0, epsilon_delay_time=8000, 
-                 buffer_capacity=10000, batch_size=64, 
-                 main_update_frequency=4, target_update_frequency=1000, 
+                 learning_rate=learning_rate, gamma=gamma,
+                 epsilon_start=epsilon_start, epsilon_end=epsilon_end, epsilon_delay_time=time_for_epsilon_to_delay_to_end, 
+                 buffer_capacity=buffer_capacity, batch_size=batch_size, 
+                 main_update_frequency=main_update_frequency, target_update_frequency=target_update_frequency, 
                  actions=[Action.TURN_RIGHT, Action.GO_STRAIGHT, Action.TURN_LEFT]):
         """
         Note:
@@ -141,9 +142,9 @@ class DQNAgent(LearningAgent):
         self.epsilon_end = 0
         return
     
-    def enter_train_mode(self, epsilon_start: float=0.8, 
-                        epsilon_end: float=0.025, 
-                        epsilon_decay_steps=10000):
+    def enter_train_mode(self, epsilon_start=epsilon_start, 
+                        epsilon_end=epsilon_end, 
+                        epsilon_decay_steps=time_for_epsilon_to_delay_to_end):
         self.main_model.train()
         self.target_model.eval()
         self.epsilon = epsilon_start

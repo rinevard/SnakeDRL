@@ -1,6 +1,6 @@
-from common.constants_and_enums import *
-from game.states import *
+from common.settings import *
 from common.utils import *
+from game.states import *
 from agent.base_agent import Agent
 
 class GreedyAgent(Agent):

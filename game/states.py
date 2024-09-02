@@ -1,4 +1,4 @@
-from common.constants_and_enums import *
+from common.settings import *
 from common.utils import *
 
 class State:
@@ -227,4 +227,3 @@ class State:
             grid_width=self.grid_width,
             grid_height=self.grid_height
         )
-
