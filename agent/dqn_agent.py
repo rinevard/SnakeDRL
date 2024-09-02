@@ -98,6 +98,10 @@ class DQNAgent(LearningAgent):
         return
     
     def learn(self) -> float:
+        """
+        Attempt to learn from collected experiences and return the loss. 
+        If there are insufficient experiences, return None.
+        """
         self.current_steps += 1
         if ((len(self.replay_buffer) < self.batch_size) or 
         (self.current_steps % self.main_update_frequency != 0)):

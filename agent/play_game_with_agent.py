@@ -89,14 +89,12 @@ def play_and_learn_with_dqn_agent(agent: DQNAgent, total_episodes=learning_total
 
         # get (s, a, r, s', done) and update game
         game_state = game.get_state()
-
-        # use helper agent to benefit experience at first
-        # does it work? i dont know =)
         action = agent.get_action(game_state)
+        # use helper agent to benefit experience at first
+        # does it work? i dont know =(
         if helper_agent and episodes <= helper_episodes:
             action = helper_agent.get_action(game_state)
-
-        game.step(action)
+        game.step(action) 
         next_state = game.get_state()
         reward = reward_func(game_state, action, next_state)
 
