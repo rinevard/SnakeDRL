@@ -1,10 +1,10 @@
 # Ensure that WIDTH and HEIGHT are multiples of BLOCKSIZE
-GAME_WIDTH: int = 100
-GAME_HEIGHT: int = 100
+GAME_WIDTH: int = 640
+GAME_HEIGHT: int = 480
 BLOCK_SIZE: int = 20
 
 # for display settings
-GAME_SPEED = 40
+GAME_SPEED = 30
 
 # for dqn_model
 dqn_hidden_layer_size: int = 256
@@ -18,7 +18,7 @@ main_update_frequency = 4
 target_update_frequency = 1000
 
 # for playing
-playing_total_rounds: int = 100
+playing_total_rounds: int = 50
 playing_rounds_per_display: int = 25
 
 # for playing and learning
