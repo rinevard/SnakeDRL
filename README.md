@@ -15,7 +15,7 @@ pygame, torch, torchvision, matplotlib
 
 ## Getting Started:
 
-1. Open a terminal (`cmd.exe` on Windows).
+1. Open a terminal.
 
 2. Download python and required packages.
 
