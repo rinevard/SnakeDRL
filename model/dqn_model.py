@@ -34,7 +34,7 @@ class SnakeLinerDQN(nn.Module):
         torch.save(self.state_dict(), full_path)
         print(f"Model saved to {full_path}")
 
-    def load(self, filename='linear_dqn_model.pth'):
+    def load(self, filename='linear_dqn_model.pth', device=None):
         script_dir = os.path.dirname(os.path.abspath(__file__))
 
         full_path = os.path.join(script_dir, 'weights', filename)
@@ -44,7 +44,7 @@ class SnakeLinerDQN(nn.Module):
             return False
 
         try:
-            self.load_state_dict(torch.load(full_path, weights_only=True))
+            self.load_state_dict(torch.load(full_path, weights_only=True, map_location=device))
             self.eval()
             print(f"Model loaded from {full_path}")
             return True

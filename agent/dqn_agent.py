@@ -157,7 +157,7 @@ class DQNAgent(LearningAgent):
         self.main_model.save()
 
     def load(self) -> bool:
-        return self.main_model.load() and self.target_model.load()
+        return self.main_model.load(device=self.device) and self.target_model.load(device=self.device)
     
     def _synchronize_networks(self) -> None:
         self.target_model.load_state_dict(self.main_model.state_dict())
@@ -222,6 +222,9 @@ class DQNAgent(LearningAgent):
         straight_direction_tuple: tuple[int, int] = convert_direction_to_tuple(straight_direction)
         left_direction_tuple: tuple[int, int] = convert_direction_to_tuple(left_direction)
         
+        right_danger_dis, straight_danger_dis, left_danger_dis = state.get_closest_danger_distances(head, 
+                                                              straight_direction)
+
         head_after_turn_right: tuple[int, int] = (head[0] + right_direction_tuple[0], 
                                                  head[1] + right_direction_tuple[1])
         head_after_go_straight: tuple[int, int] = (head[0] + straight_direction_tuple[0], 
@@ -235,6 +238,7 @@ class DQNAgent(LearningAgent):
                                                                                straight_direction)
         danger_distances_after_turn_left = state.get_closest_danger_distances(head_after_turn_left, 
                                                                              left_direction)
+
         # shape: (15,)
         # dtype: torch.float32
         return torch.tensor([

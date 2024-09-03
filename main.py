@@ -3,7 +3,6 @@ import torch
 from common.settings import *
 from agent.play_game_with_agent import *
 from agent.dqn_agent import DQNAgent
-from model.dqn_model import SnakeLinerDQN
 
 def main():
     """
