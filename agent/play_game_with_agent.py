@@ -32,8 +32,6 @@ def play_with_agent(agent: Agent,
                     playing_rounds_per_display=playing_rounds_per_display, 
                     total_rounds=playing_total_rounds):
     print(f"Play for {total_rounds} rounds and coumpute the average score...")
-    if isinstance(agent, LearningAgent):
-        agent.enter_eval_mode()
     game = Game(display_on=False)
     game_over_times = 0
     scores = []
