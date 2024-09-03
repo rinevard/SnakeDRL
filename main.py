@@ -72,13 +72,15 @@ def play_mode(dqn_agent: DQNAgent):
     """
     if load_model(dqn_agent):
         print("Previous model loaded successfully.")
-        play_with_agent(dqn_agent, display_rounds=playing_rounds_per_display, 
+        play_with_agent(dqn_agent, 
+                        playing_rounds_per_display=playing_rounds_per_display, 
                         total_rounds=playing_total_rounds)
     else:
         prompt = "Without loaded weights, the agent's performance will be poor. Continue? (y/n): "
         if confirm_action(prompt):
             print("Continuing with untrained agent...")
-            play_with_agent(dqn_agent, display_rounds=playing_rounds_per_display, 
+            play_with_agent(dqn_agent, 
+                            playing_rounds_per_display=playing_rounds_per_display, 
                             total_rounds=playing_total_rounds)
         else:
             print("Returning to mode selection...")
@@ -95,18 +97,16 @@ def learn_and_play_mode(dqn_agent: DQNAgent, update_plot):
         else:
             print("Failed to load previous model. Starting from scratch...")
     
-    play_and_learn_with_dqn_agent(dqn_agent, total_episodes=learning_total_episodes, 
-                                  update_plot_callback=update_plot, 
-                                  display_rounds=learning_episodes_per_display, 
-                                  epsilon_start=epsilon_start, 
-                                  epsilon_end=epsilon_end, 
-                                  epsilon_decay_steps=epsilon_decay_steps)
+    play_and_learn_with_learning_agent(dqn_agent, 
+                                       total_episodes=learning_total_episodes, 
+                                       update_plot_callback=update_plot, 
+                                       learning_episodes_per_display=learning_episodes_per_display)
 
 def load_model(dqn_agent: DQNAgent):
     """
     Return True if loaded successfully else False.
     """
-    if dqn_agent.main_model.load():
+    if dqn_agent.load():
         print("Previous model loaded successfully.")
         return True
     else:

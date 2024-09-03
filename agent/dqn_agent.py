@@ -132,22 +132,9 @@ class DQNAgent(LearningAgent):
         
         if self.current_steps >= self.target_update_frequency:
             self.current_steps = 0
-            self.synchronize_networks()
-        self.update_epsilon()
+            self._synchronize_networks()
+        self._update_epsilon()
         return loss.item()
-    
-    def synchronize_networks(self) -> None:
-        self.target_model.load_state_dict(self.main_model.state_dict())
-        self.target_model.eval()
-        return
-    
-    def enter_eval_mode(self) -> None:
-        self.main_model.eval()
-        self.target_model.eval()
-        self.epsilon = 0
-        self.epsilon_decay_steps = 0
-        self.epsilon_end = 0
-        return
     
     def enter_train_mode(self, epsilon_start=epsilon_start, 
                         epsilon_end=epsilon_end, 
@@ -159,8 +146,27 @@ class DQNAgent(LearningAgent):
         self.epsilon_end = epsilon_end
         self.epsilon_decay_steps = (self.epsilon - self.epsilon_end) / self.epsilon_decay_steps
         return
+    
+    def enter_eval_mode(self) -> None:
+        self.main_model.eval()
+        self.target_model.eval()
+        self.epsilon = 0
+        self.epsilon_decay_steps = 0
+        self.epsilon_end = 0
+        return
+    
+    def save(self):
+        self.main_model.save()
 
-    def update_epsilon(self) -> None:
+    def load(self):
+        self.main_model.load()
+    
+    def _synchronize_networks(self) -> None:
+        self.target_model.load_state_dict(self.main_model.state_dict())
+        self.target_model.eval()
+        return
+    
+    def _update_epsilon(self) -> None:
         self.epsilon -= self.epsilon_decay_steps
         if self.epsilon <= self.epsilon_end:
             self.epsilon = self.epsilon_end

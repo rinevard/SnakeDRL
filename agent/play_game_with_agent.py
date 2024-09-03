@@ -2,11 +2,10 @@ import matplotlib.pyplot as plt
 from collections import deque
 
 from common.settings import *
-from agent.base_agent import Agent
-from agent.dqn_agent import DQNAgent
+from agent.base_agent import *
 from game.main_game import Game
-from game.states import *
-            
+from game.states import State
+
 def reward_func(state: State, action: Action, next_state: State) -> float:
     if (next_state.is_game_over()):
         return -300 / state.get_snake_length()
@@ -29,16 +28,17 @@ def reward_func(state: State, action: Action, next_state: State) -> float:
         reward = (next_score - cur_score) * 20 + (0.5 * state.get_snake_length())
     return reward
 
-def play_with_agent(agent: DQNAgent, 
-                    display_rounds=playing_rounds_per_display, 
+def play_with_agent(agent: Agent, 
+                    playing_rounds_per_display=playing_rounds_per_display, 
                     total_rounds=playing_total_rounds):
     print(f"Play for {total_rounds} rounds and coumpute the average score...")
-    agent.enter_eval_mode()
+    if isinstance(agent, LearningAgent):
+        agent.enter_eval_mode()
     game = Game(display_on=False)
     game_over_times = 0
     scores = []
     while game_over_times < total_rounds:
-        if game_over_times % display_rounds == 0:
+        if game_over_times % playing_rounds_per_display == 0:
             game.set_display_on()
         else:
             game.set_display_off()
@@ -59,30 +59,25 @@ def play_with_agent(agent: DQNAgent,
     print(f"\nAverage score in {total_rounds} rounds: {sum(scores) / total_rounds}\n")
     return
 
-def play_and_learn_with_dqn_agent(agent: DQNAgent, total_episodes=learning_total_episodes, 
+def play_and_learn_with_learning_agent(agent: LearningAgent, 
+                                  total_episodes=learning_total_episodes, 
                                   update_plot_callback=None, 
                                   helper_agent: Agent=None, 
-                                  display_rounds=learning_episodes_per_display, 
-                                  helper_episodes=59, 
-                                  epsilon_start=epsilon_start, epsilon_end=epsilon_end,
-                                  epsilon_decay_steps=epsilon_decay_steps):
+                                  learning_episodes_per_display=learning_episodes_per_display, 
+                                  helper_episodes=59):
     """
     Parameters:
         update_plot_callback: a callback function updating the plot, (float, int) -> None
     """
-    agent.enter_train_mode(epsilon_start=epsilon_start, 
-                           epsilon_end=epsilon_end,
-                           epsilon_decay_steps=epsilon_decay_steps)
+    agent.enter_train_mode()
     game = Game(display_on=False)
     episodes = 0
     episode_losses = []
     avg_loss = None
     avg_score = None
     scores_recent_hundred_round = deque(maxlen=100)
-    agent.main_model.train()
-    agent.target_model.eval()
     while episodes < total_episodes:
-        if episodes % display_rounds == 0:
+        if episodes % learning_episodes_per_display == 0:
             game.set_display_on()
         else:
             game.set_display_off()
@@ -109,7 +104,7 @@ def play_and_learn_with_dqn_agent(agent: DQNAgent, total_episodes=learning_total
 
             # save weights
             if episodes % learning_episodes_per_save == 0:
-                agent.main_model.save()
+                agent.save()
                 print(f"Feel free to press Ctrl+C to terminate the program or close the window")
 
             # compute average loss and average score 
@@ -117,7 +112,6 @@ def play_and_learn_with_dqn_agent(agent: DQNAgent, total_episodes=learning_total
 
 
             print(f"Play times: {episodes}, Score: {next_state.get_score()}")
-            print(f"Epsilon: {agent.epsilon}")
             if episode_losses:
                 avg_loss = sum(episode_losses) / len(episode_losses)
                 print(f"Average loss: {avg_loss}")
