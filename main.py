@@ -43,7 +43,14 @@ def main():
                         │   └─── Play and learn with loaded model
                         │
                         └─── Fail
-                            └─── Start new training
+                            │
+                            └─── Continue without loaded model?
+                                │
+                                ├─── Yes
+                                │   └─── Play and learn with untrained model
+                                │
+                                └─── No
+                                    └─── Return to mode selection
     """
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     # dqn_agent
@@ -61,20 +68,21 @@ def main():
             update_plot = create_training_plotter()
             
             print("Learn and Play mode selected.")
-            learn_and_play_mode(dqn_agent, update_plot)
-            break
+            if learn_and_play_mode(dqn_agent, update_plot):
+                break
         else:
             print("Invalid input. Please enter 'a' for Play or 'b' for Learn and Play.")
 
 def play_mode(dqn_agent: DQNAgent):
     """
-    Return True if agent start playing else False.
+    Return True if agent starts playing else False.
     """
     if load_model(dqn_agent):
         print("Previous model loaded successfully.")
         play_with_agent(dqn_agent, 
                         playing_rounds_per_display=playing_rounds_per_display, 
                         total_rounds=playing_total_rounds)
+        return True
     else:
         prompt = "Without loaded weights, the agent's performance will be poor. Continue? (y/n): "
         if confirm_action(prompt):
@@ -82,35 +90,40 @@ def play_mode(dqn_agent: DQNAgent):
             play_with_agent(dqn_agent, 
                             playing_rounds_per_display=playing_rounds_per_display, 
                             total_rounds=playing_total_rounds)
+            return True
         else:
             print("Returning to mode selection...")
             return False
-    return True
 
 def learn_and_play_mode(dqn_agent: DQNAgent, update_plot):
-    if confirm_action("Start training from scratch? (y/n): "):
-        print("Starting training from scratch...")
-    else:
+    """
+    Return True if agent starts learning and playing else False.
+    """
+    if not confirm_action("Start training from scratch? (y/n): "):
         print("Attempting to load previous model...")
-        if dqn_agent.main_model.load() and dqn_agent.target_model.load():
+        if load_model(dqn_agent):
             print("Previous model loaded successfully.")
         else:
-            print("Failed to load previous model. Starting from scratch...")
+            print("Failed to load previous model.")
+            if not confirm_action("Continue with untrained model? (y/n): "):
+                print("Returning to mode selection...")
+                return False
     
+    print("Starting training...")
     play_and_learn_with_learning_agent(dqn_agent, 
                                        total_episodes=learning_total_episodes, 
                                        update_plot_callback=update_plot, 
                                        learning_episodes_per_display=learning_episodes_per_display)
+    return True
 
 def load_model(dqn_agent: DQNAgent):
     """
+    Load both main and target models.
     Return True if loaded successfully else False.
     """
     if dqn_agent.load():
-        print("Previous model loaded successfully.")
         return True
     else:
-        print("Failed to load previous model.")
         return False
 
 def confirm_action(prompt: str):
@@ -125,4 +138,3 @@ def confirm_action(prompt: str):
 
 if __name__ == "__main__":
     main()
-

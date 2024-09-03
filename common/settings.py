@@ -25,7 +25,7 @@ playing_rounds_per_display: int = 25
 learning_total_episodes: int = 3000
 learning_episodes_per_display: int = 300
 learning_episodes_per_save: int = 50
-epsilon_start: float = 0.8
+epsilon_start: float = 0.8  
 epsilon_end: float = 0
 epsilon_decay_steps = 4000
 

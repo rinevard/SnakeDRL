@@ -8,7 +8,7 @@ from game.states import State
 
 def reward_func(state: State, action: Action, next_state: State) -> float:
     if (next_state.is_game_over()):
-        return -300 / state.get_snake_length()
+        return -300 / (next_state.get_score() + 1)
     
     reward = 0
 

@@ -158,8 +158,8 @@ class DQNAgent(LearningAgent):
     def save(self):
         self.main_model.save()
 
-    def load(self):
-        self.main_model.load()
+    def load(self) -> bool:
+        return self.main_model.load() and self.target_model.load()
     
     def _synchronize_networks(self) -> None:
         self.target_model.load_state_dict(self.main_model.state_dict())
