@@ -1,4 +1,4 @@
-# SnakeRL
+# SnakeDRL
 
 ## Overview
 
@@ -25,11 +25,11 @@ pygame, torch, torchvision, matplotlib
 
 3. Clone the repo or download it.
 
-   `git clone https://github.com/rinevard/SnakeRL.git`
+   `git clone https://github.com/rinevard/SnakeDRL.git`
 
 4. Navigate to the project directory.
 
-   `cd SnakeRL/`
+   `cd SnakeDRL/`
 
 5. Run `python main.py` in terminal window and train your own snake!
 
