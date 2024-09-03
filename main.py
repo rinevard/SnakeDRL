@@ -54,9 +54,7 @@ def main():
     """
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     # dqn_agent
-    main_model = SnakeLinerDQN(15, 3).to(device=device)
-    target_model = SnakeLinerDQN(15, 3).to(device=device)
-    dqn_agent = DQNAgent(main_model, target_model, device=device)
+    dqn_agent = DQNAgent(device=device)
     while True:
         user_input = input("Choose mode: (a) Play or (b) Learn and Play (a/b): ").lower()
         if user_input in ['a', 'play']:

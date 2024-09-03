@@ -43,31 +43,29 @@ class ReplayBuffer():
         return len(self.buffer)
 
 class DQNAgent(LearningAgent):
-    def __init__(self, main_model: SnakeLinerDQN, target_model: SnakeLinerDQN, device, 
+    def __init__(self, device, 
                  learning_rate=learning_rate, gamma=gamma,
-                 epsilon_start=epsilon_start, epsilon_end=epsilon_end, epsilon_delay_time=epsilon_decay_steps, 
+                 epsilon_start=epsilon_start, epsilon_end=epsilon_end, epsilon_decay_steps=epsilon_decay_steps, 
                  buffer_capacity=buffer_capacity, batch_size=batch_size, 
                  main_update_frequency=main_update_frequency, target_update_frequency=target_update_frequency, 
                  actions=[Action.TURN_RIGHT, Action.GO_STRAIGHT, Action.TURN_LEFT]):
-        """
-        Note:
-        num_actions of 'main_model' and 'target_model' must be equal to len('actions')
-        """
         self.device = device
         print(f"Agent initialized on device: {self.device}")
-        self.epsilon_decay_steps = (epsilon_start - epsilon_end) / epsilon_delay_time
+
+        self.epsilon_decay_steps = (epsilon_start - epsilon_end) / epsilon_decay_steps
         self.batch_size = batch_size
         self.replay_buffer = ReplayBuffer(buffer_capacity)
-        self.main_model = main_model
-        self.target_model = target_model
+        self.state_tensor_size = 15 # should match method '_get_state_tensor'
+        self.main_model = SnakeLinerDQN(self.state_tensor_size, len(actions)).to(self.device)
+        self.target_model = SnakeLinerDQN(self.state_tensor_size, len(actions)).to(self.device)
         self.optimizer = torch.optim.Adam(self.main_model.parameters(), lr=learning_rate)
 
         self.gamma = gamma
         self.epsilon = epsilon_start
         self.epsilon_end = epsilon_end
 
-        self.current_steps = 0 # when % main_frequency == 0, update main; 
-                               # when % target_frequency == 0, synchronize networks
+        self.current_steps = 0 # when self.current_steps % main_frequency == 0, update main; 
+                               # when self.current_steps % target_frequency == 0, synchronize networks
         self.main_update_frequency = main_update_frequency
         self.target_update_frequency = target_update_frequency
         self.actions = actions
@@ -79,7 +77,7 @@ class DQNAgent(LearningAgent):
         else:
             with torch.no_grad():
                 # shape: (9, )
-                state_tensor = state.get_state_tensor().to(device=self.device)
+                state_tensor = self._get_state_tensor(state).to(device=self.device)
                 # shape: (1, 3)
                 q_values = self.main_model(state_tensor.unsqueeze(dim=0))
                 return self.actions[torch.argmax(q_values).item()]
@@ -89,10 +87,10 @@ class DQNAgent(LearningAgent):
         Remember (s, a, r, s', done), which would be used for method 'learn'.
         """
         # save GPU memory
-        s = state.get_state_tensor().cpu()
+        s = self._get_state_tensor(state).cpu()
         a = convert_action_to_action_idx(action)
         r = reward
-        s_new = next_state.get_state_tensor().cpu()
+        s_new = self._get_state_tensor(next_state).cpu()
         exprience = (s, a, r, s_new, done)
         self.replay_buffer.add(exprience)
         return
@@ -172,3 +170,87 @@ class DQNAgent(LearningAgent):
             self.epsilon = self.epsilon_end
         return
 
+    def _get_state_tensor(self, state: State) -> torch.Tensor:
+        """
+        Return a tensor representation of the current game state
+
+        Returns:
+        A tensor with shape (15,)
+
+        idx:
+        direction_x: 0
+        direction_y: 1
+        food_relative_pos: 2, 3
+        snake_len: 4
+        steps_of_do_nothing: 5
+
+        right_danger_dis_after_turn_right: 6
+        straight_danger_dis_after_turn_right: 7
+        left_danger_dis_after_turn_right: 8
+        
+        right_danger_dis_after_go_straight: 9
+        straight_danger_dis_after_go_straight: 10
+        left_danger_dis_after_go_straight: 11
+
+        right_danger_dis_after_turn_left: 12
+        straight_danger_dis_after_turn_left: 13
+        left_danger_dis_after_turn_left: 14
+        """
+        head: tuple[int, int] = state.get_snake_head()
+        body: list[tuple[int, int]] = state.get_snake_body()
+        food: tuple[int, int] = state.get_food()
+
+        direction: Direction = state.get_direction()
+        # direction_x, direction_y
+        direction_tuple: tuple[int, int] = convert_direction_to_tuple(direction)
+        # food_relative_pos
+        food_relative_pos: tuple[int, int] = convert_global_pos_to_relative_pos(head, 
+                                                               direction, 
+                                                               food)
+
+        # snake_len
+        snake_length: int = len(state.get_snake())
+        # steps_of_do_nothing
+        steps_of_do_nothing: int = state.steps_of_do_nothing
+
+        # danger_distances
+        straight_direction: Direction = state.direction
+        left_direction: Direction = change_direction(straight_direction, Action.TURN_LEFT)
+        right_direction: Direction = change_direction(straight_direction, Action.TURN_RIGHT)
+
+        right_direction_tuple: tuple[int, int] = convert_direction_to_tuple(right_direction)
+        straight_direction_tuple: tuple[int, int] = convert_direction_to_tuple(straight_direction)
+        left_direction_tuple: tuple[int, int] = convert_direction_to_tuple(left_direction)
+        
+        head_after_turn_right: tuple[int, int] = (head[0] + right_direction_tuple[0], 
+                                                 head[1] + right_direction_tuple[1])
+        head_after_go_straight: tuple[int, int] = (head[0] + straight_direction_tuple[0], 
+                                                   head[1] + straight_direction_tuple[1])
+        head_after_turn_left: tuple[int, int] = (head[0] + left_direction_tuple[0], 
+                                                 head[1] + left_direction_tuple[1])
+        
+        danger_distances_after_turn_right = state.get_closest_danger_distances(head_after_turn_right, 
+                                                                              right_direction)
+        danger_distances_after_go_straight = state.get_closest_danger_distances(head_after_go_straight, 
+                                                                               straight_direction)
+        danger_distances_after_turn_left = state.get_closest_danger_distances(head_after_turn_left, 
+                                                                             left_direction)
+        # shape: (15,)
+        # dtype: torch.float32
+        return torch.tensor([
+            direction_tuple[0], 
+            direction_tuple[1], 
+            food_relative_pos[0], 
+            food_relative_pos[1], 
+            snake_length, 
+            steps_of_do_nothing, 
+            danger_distances_after_turn_right[0], 
+            danger_distances_after_turn_right[1], 
+            danger_distances_after_turn_right[2],
+            danger_distances_after_go_straight[0], 
+            danger_distances_after_go_straight[1], 
+            danger_distances_after_go_straight[2],
+            danger_distances_after_turn_left[0], 
+            danger_distances_after_turn_left[1], 
+            danger_distances_after_turn_left[2], 
+        ]).to(dtype=torch.float32)

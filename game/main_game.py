@@ -24,6 +24,9 @@ class Game:
         return
     
     def get_state(self) -> State:
+        """
+        Return a deep copy of current game state.
+        """
         return self.logic.get_state().copy()
 
     def reset(self) -> None:

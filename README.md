@@ -47,7 +47,7 @@ Note: You can also run `main.ipynb` on [Google Colab](https://colab.research.goo
 .
 ├── agent/
 │ ├── base_agent.py # The base agent class
-│ ├── dqn_agent.py # The agent using DQN for learning
+│ ├── dqn_agent.py # The agent using DQN for learning, also define tensor representation of state
 │ ├── greedy_agent.py # A simple agent that runs directly towards food
 │ └── play_game_with_agent.py # Reward func, play func, play and learn func
 │
@@ -59,7 +59,7 @@ Note: You can also run `main.ipynb` on [Google Colab](https://colab.research.goo
 │ ├── game_display.py # Game display
 │ ├── game_logic.py # Game logic
 │ ├── main_game.py # Integrates game_display and game_logic
-│ └── states.py # Game state and corresponding state tensor
+│ └── states.py # Game state
 │
 ├── model/
 │ ├── weights/
