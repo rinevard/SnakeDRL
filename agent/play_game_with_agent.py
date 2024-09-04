@@ -7,8 +7,11 @@ from game.main_game import Game
 from game.states import State
 
 def reward_func(state: State, action: Action, next_state: State) -> float:
+    cur_score = state.get_score()
+    next_score = next_state.get_score()
+
     if (next_state.is_game_over()):
-        return -20 / (next_state.get_score() + 1)
+        return -20 / (next_score + 1)
     
     reward = 0
 
@@ -24,10 +27,8 @@ def reward_func(state: State, action: Action, next_state: State) -> float:
     reward += (dis - next_dis)
 
     # score reward
-    cur_score = state.get_score()
-    next_score = next_state.get_score()
     if (next_score != cur_score):
-        reward = (next_score - cur_score) * 20 + (0.5 * state.get_snake_length())
+        reward = (next_score - cur_score) * 20 + (0.5 * next_score)
     return reward
 
 def play_with_agent(agent: Agent, 
