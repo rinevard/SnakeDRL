@@ -11,7 +11,7 @@ def reward_func(state: State, action: Action, next_state: State) -> float:
     next_score = next_state.get_score()
 
     if (next_state.is_game_over()):
-        return -20 / (next_score + 1)
+        return -10 + (-20 / (next_score + 1))
     
     reward = 0
 
