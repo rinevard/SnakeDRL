@@ -8,24 +8,15 @@ from game.states import State
 
 def reward_func(state: State, action: Action, next_state: State) -> float:
     if (next_state.is_game_over()):
-        return -300 / (next_state.get_score() + 1)
-    
-    reward = 0
+        return -1
 
-    # encourage get closer to food
-    head = state.get_snake_head()
-    food = state.get_food()
-    dis = abs(head[0] - food[0]) + abs(head[1] - food[1])
-    next_head = next_state.get_snake_head()
-    next_food = next_state.get_food()
-    next_dis = abs(next_head[0] - next_food[0]) + abs(next_head[1] - next_food[1])
-    reward += (dis - next_dis)
+    reward = 0
 
     # score reward
     cur_score = state.get_score()
     next_score = next_state.get_score()
     if (next_score != cur_score):
-        reward = (next_score - cur_score) * 20 + (0.5 * state.get_snake_length())
+        reward = (next_score - cur_score) + (0.5 * next_state.get_score())
     return reward
 
 def play_with_agent(agent: Agent, 

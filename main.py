@@ -2,75 +2,94 @@ import torch
 
 from common.settings import *
 from agent.play_game_with_agent import *
-from agent.dqn_agent import DQNAgent
+from agent.mlp_agent import MLPAgent
+from agent.cnn_agent import CNNAgent
 
 def main():
     """
     Start
     │
-    └─── Choose mode
+    └─── Choose agent type
         │
-        ├─── Play
-        │   │
-        │   └─── Load previous model
-        │       │
-        │       ├─── Success
-        │       │   └─── Play with loaded model
-        │       │
-        │       └─── Fail
-        │           │
-        │           └─── Continue without loaded model?
-        │               │
-        │               ├─── Yes
-        │               │   └─── Play with untrained model
-        │               │
-        │               └─── No
-        │                   └─── Return to mode selection
+        ├─── MLP Agent
         │
-        └─── Learn and Play
+        └─── CNN Agent
             │
-            └─── Start training from scratch?
+            └─── Choose mode
                 │
-                ├─── Yes
-                │   └─── Start new training
+                ├─── Play
+                │   │
+                │   └─── Load previous model
+                │       │
+                │       ├─── Success
+                │       │   └─── Play with loaded model
+                │       │
+                │       └─── Fail
+                │           │
+                │           └─── Continue without loaded model?
+                │               │
+                │               ├─── Yes
+                │               │   └─── Play with untrained model
+                │               │
+                │               └─── No
+                │                   └─── Return to mode selection
                 │
-                └─── No
+                └─── Learn and Play
                     │
-                    └─── Load previous model
+                    └─── Start training from scratch?
                         │
-                        ├─── Success
-                        │   └─── Play and learn with loaded model
+                        ├─── Yes
+                        │   └─── Start new training
                         │
-                        └─── Fail
+                        └─── No
                             │
-                            └─── Continue without loaded model?
+                            └─── Load previous model
                                 │
-                                ├─── Yes
-                                │   └─── Play and learn with untrained model
+                                ├─── Success
+                                │   └─── Play and learn with loaded model
                                 │
-                                └─── No
-                                    └─── Return to mode selection
+                                └─── Fail
+                                    │
+                                    └─── Continue without loaded model?
+                                        │
+                                        ├─── Yes
+                                        │   └─── Play and learn with untrained model
+                                        │
+                                        └─── No
+                                            └─── Return to mode selection
     """
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    # dqn_agent
-    dqn_agent = DQNAgent(device=device)
+    
+    while True:
+        agent_type = input("Choose agent type: (a) MLP Agent or (b) CNN Agent (a/b): ").lower()
+        if agent_type in ['a', 'mlp']:
+            agent = MLPAgent(device=device)
+            print("MLP Agent selected.")
+            break
+        elif agent_type in ['b', 'cnn']:
+            agent = CNNAgent(device=device)
+            print("CNN Agent selected.")
+            break
+        else:
+            print("Invalid input. Please enter 'a' for MLP Agent or 'b' for CNN Agent.")
+    
     while True:
         user_input = input("Choose mode: (a) Play or (b) Learn and Play (a/b): ").lower()
         if user_input in ['a', 'play']:
             print("Play mode selected.")
-            if play_mode(dqn_agent):
+            if play_mode(agent):
                 break
         elif user_input in ['b', 'learn and play']:
             # create a callback function to update the figure dynamically
             update_plot = create_training_plotter()
             
             print("Learn and Play mode selected.")
-            if learn_and_play_mode(dqn_agent, update_plot):
+            if learn_and_play_mode(agent, update_plot):
                 break
         else:
             print("Invalid input. Please enter 'a' for Play or 'b' for Learn and Play.")
 
-def play_mode(dqn_agent: DQNAgent):
+def play_mode(dqn_agent: LearningAgent):
     """
     Return True if agent starts playing else False.
     """
@@ -92,7 +111,7 @@ def play_mode(dqn_agent: DQNAgent):
             print("Returning to mode selection...")
             return False
 
-def learn_and_play_mode(dqn_agent: DQNAgent, update_plot):
+def learn_and_play_mode(dqn_agent: LearningAgent, update_plot):
     """
     Return True if agent starts learning and playing else False.
     """
@@ -113,7 +132,7 @@ def learn_and_play_mode(dqn_agent: DQNAgent, update_plot):
                                        learning_episodes_per_display=learning_episodes_per_display)
     return True
 
-def load_model(dqn_agent: DQNAgent):
+def load_model(dqn_agent: LearningAgent):
     """
     Load both main and target models.
     Return True if loaded successfully else False.

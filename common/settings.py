@@ -1,6 +1,6 @@
 # Ensure that WIDTH and HEIGHT are multiples of BLOCKSIZE
-GAME_WIDTH: int = 640
-GAME_HEIGHT: int = 480
+GAME_WIDTH: int = 200
+GAME_HEIGHT: int = 200
 BLOCK_SIZE: int = 20
 
 # for display settings

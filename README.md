@@ -47,7 +47,8 @@ Note: You can also run `main.ipynb` on [Google Colab](https://colab.research.goo
 .
 ├── agent/
 │ ├── base_agent.py # The base agent class
-│ ├── dqn_agent.py # The agent using DQN for learning, also define tensor representation of state
+│ ├── mlp_agent.py # The agent using MLP and DQN
+│ ├── cnn_agent.py # The agent using CNN and DQN
 │ ├── greedy_agent.py # A simple agent that runs directly towards food
 │ └── play_game_with_agent.py # Reward func, play func, play and learn func
 │
@@ -63,8 +64,9 @@ Note: You can also run `main.ipynb` on [Google Colab](https://colab.research.goo
 │
 ├── model/
 │ ├── weights/
-│ │ └── linear_dqn_model.pth # Model weights
-│ └── dqn_model.py # Neural network used by DQNagent
+│ │ └── mlp_model.pth # Model weights
+│ │ └── cnn_model.pth # Model weights
+│ └── dqn_model.py # Neural networks
 │
 ├── pngs_and_gifs/ # Image folder
 │
@@ -102,6 +104,11 @@ Note: You can also run `main.ipynb` on [Google Colab](https://colab.research.goo
 2.  Why not use CNN and represent the state with a matrix?
 
     At first I tried to represent the state with a tensor whose shape is (channels, grid_width, grid_height) and use CNN as the model, but the agent seems to learn nothing. Probably the reason is that there are too many states for the agent.
+
+    Update (2024.9.2)
+    I tried training a CNN-based agent again and found that it is feasible. I trained a CNN-based agent on a 10x10 grid, and after about 1000 episodes of training, it could score around 25 points (averaged over 100 simulation rounds). In comparison, after about 1000 episodes of training, MLP-agent could score around 27 points.
+
+    However, the training speed was significantly slower than training an MLP-based agent. Additionally, I was using a lightweight laptop with integrated graphics, and I trained the MLP agent on the local CPU. Training a CNN-based agent on the CPU was too slow, so I trained the CNN-based agent on GPU using Google Colab.
 
 3.  Any other resources about teaching AI to play Snake?
 

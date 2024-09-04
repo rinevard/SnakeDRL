@@ -81,6 +81,12 @@ class State:
         """
         return len(self.snake)
     
+    def get_grid_width(self) -> int:
+        return self.grid_width
+    
+    def get_grid_height(self) -> int:
+        return self.grid_height
+    
     def get_closest_danger_dis(self, pos: tuple[int, int], direction: Direction) -> int:
         """
         Return the closest danger distance in 'direction' from 'pos'
