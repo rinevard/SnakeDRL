@@ -9,13 +9,13 @@ class SnakeMLP(nn.Module):
     def __init__(self, input_size, output_size) -> None:
         super().__init__()
         self.fc = nn.Sequential(
-            nn.Linear(input_size, dqn_hidden_layer_size), 
+            nn.Linear(input_size, mlp_hidden_layer_size), 
             nn.ReLU(), 
-            nn.Linear(dqn_hidden_layer_size, dqn_hidden_layer_size), 
+            nn.Linear(mlp_hidden_layer_size, mlp_hidden_layer_size), 
             nn.ReLU(), 
-            nn.Linear(dqn_hidden_layer_size, dqn_hidden_layer_size), 
+            nn.Linear(mlp_hidden_layer_size, mlp_hidden_layer_size), 
             nn.ReLU(), 
-            nn.Linear(dqn_hidden_layer_size, output_size)
+            nn.Linear(mlp_hidden_layer_size, output_size)
         )
         self._initialize_weights()
 
@@ -62,28 +62,25 @@ class SnakeMLP(nn.Module):
 class SnakeCNN(nn.Module):
     def __init__(self, input_channels, output_size) -> None:
         super().__init__()
-        conv_mid_channels = 256
-        conv_out_channels = 128
         self.conv = nn.Sequential(
-            nn.Conv2d(input_channels, conv_mid_channels, kernel_size=3, padding=1), 
+            nn.Conv2d(input_channels, cnn_conv_mid_channels, kernel_size=3, padding=1), 
             nn.ReLU(), 
-            nn.Conv2d(conv_mid_channels, conv_mid_channels, kernel_size=3, padding=1),
+            nn.Conv2d(cnn_conv_mid_channels, cnn_conv_mid_channels, kernel_size=3, padding=1),
             nn.ReLU(), 
-            nn.Conv2d(conv_mid_channels, conv_mid_channels, kernel_size=3, padding=1),
+            nn.Conv2d(cnn_conv_mid_channels, cnn_conv_mid_channels, kernel_size=3, padding=1),
             nn.ReLU(), 
-            nn.Conv2d(conv_mid_channels, conv_out_channels, kernel_size=3, padding=1)
+            nn.Conv2d(cnn_conv_mid_channels, cnn_out_channels, kernel_size=3, padding=1)
         )
         adaptive_output_size = (1, 1)
         self.adaptive_pool = nn.AdaptiveAvgPool2d(adaptive_output_size)
 
-        input_size = conv_out_channels * adaptive_output_size[0] * adaptive_output_size[1]
-        hidden_layer_size = 256
+        input_size = cnn_out_channels * adaptive_output_size[0] * adaptive_output_size[1]
         self.fc = nn.Sequential(
-            nn.Linear(input_size, hidden_layer_size), 
+            nn.Linear(input_size, cnn_fc_hidden_layer_size), 
             nn.ReLU(), 
-            nn.Linear(hidden_layer_size, hidden_layer_size), 
+            nn.Linear(cnn_fc_hidden_layer_size, cnn_fc_hidden_layer_size), 
             nn.ReLU(), 
-            nn.Linear(hidden_layer_size, output_size)
+            nn.Linear(cnn_fc_hidden_layer_size, output_size)
         )
         self._initialize_weights()
 

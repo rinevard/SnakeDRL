@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 from collections import deque
+import numpy as np
 
 from common.settings import *
 from agent.base_agent import *
@@ -57,9 +58,14 @@ def play_with_agent(agent: Agent,
             print(f"Times: {game_over_times}, Score: {new_game_state.get_score()}\n")
             scores.append(new_game_state.get_score())
             game.reset()
-    
-    print(f"\nHighest score in {total_rounds} rounds: {max(scores)}")
-    print(f"\nAverage score in {total_rounds} rounds: {sum(scores) / total_rounds}\n")
+
+    highest_score = max(scores)
+    average_score = np.mean(scores)
+    score_variance = np.var(scores)
+
+    print(f"\nHighest score in {total_rounds} rounds: {highest_score}")
+    print(f"Average score in {total_rounds} rounds: {average_score:.2f}")
+    print(f"Variance of scores in {total_rounds} rounds: {score_variance:.2f}\n")
     return
 
 def play_and_learn_with_learning_agent(agent: LearningAgent, 

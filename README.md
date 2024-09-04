@@ -106,9 +106,9 @@ Note: You can also run `main.ipynb` on [Google Colab](https://colab.research.goo
     At first I tried to represent the state with a tensor whose shape is (channels, grid_width, grid_height) and use CNN as the model, but the agent seems to learn nothing. Probably the reason is that there are too many states for the agent.
 
     Update (2024.9.2)
-    I tried training a CNN-based agent again and found that it is feasible. I trained a CNN-based agent on a 10x10 grid, and after about 1000 episodes of training, it could score around 25 points (averaged over 100 simulation rounds). In comparison, after about 1000 episodes of training, MLP-agent could score around 27 points.
+    I tried training a CNN-based agent again and found that it is feasible. I trained a CNN-based agent on a 10x10 grid, and after about 1500 episodes of training, it could score around 30 points (averaged over 100 simulation rounds). In comparison, after about 1500 episodes of training, the MLP-based agent could score around 30 points as well. Furthermore, the CNN-based agent produced greater variance in scores compared to the MLP-based agent. The CNN-based agent sometimes kept circling around the food and did nothing. I guess that's because its tensor representation of state doesn't include 'time' (for the MLP-agent, 'time' is represented as 'steps_of_do_nothing').
 
-    However, the training speed was significantly slower than training an MLP-based agent. Additionally, I was using a lightweight laptop with integrated graphics, and I trained the MLP agent on the local CPU. Training a CNN-based agent on the CPU was too slow, so I trained the CNN-based agent on GPU using Google Colab.
+    However, the training speed was significantly slower than training an MLP-based agent. I was using a laptop with integrated graphics, and I trained the MLP agent on the local CPU. Training a CNN-based agent on the CPU was too slow, so I trained the CNN-based agent on GPU using Google Colab.
 
 3.  Any other resources about teaching AI to play Snake?
 
