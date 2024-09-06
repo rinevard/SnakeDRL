@@ -1,10 +1,10 @@
 # Ensure that WIDTH and HEIGHT are multiples of BLOCKSIZE
-GAME_WIDTH: int = 200
-GAME_HEIGHT: int = 200
-BLOCK_SIZE: int = 20
+GAME_WIDTH: int = 300
+GAME_HEIGHT: int = 300
+BLOCK_SIZE: int = 30
 
 # for display settings
-GAME_SPEED = 30
+GAME_SPEED = 20
 
 # for dqn_model
 # To change model weights, place your .pth file in the '/model/weights' directory 

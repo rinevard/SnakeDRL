@@ -6,18 +6,18 @@ from agent.mlp_agent import MLPAgent
 from agent.cnn_agent import CNNAgent
 
 def main():
-    """
+    """   
     Start
     │
     └─── Choose agent type
         │
-        ├─── MLP Agent
+        ├─── (a) MLP Agent
         │
-        └─── CNN Agent
+        └─── (b) CNN Agent
             │
             └─── Choose mode
                 │
-                ├─── Play
+                ├─── (a) Play
                 │   │
                 │   └─── Load previous model
                 │       │
@@ -28,66 +28,47 @@ def main():
                 │           │
                 │           └─── Continue without loaded model?
                 │               │
-                │               ├─── Yes
-                │               │   └─── Play with untrained model
+                │               ├─── (a) Return to mode selection
                 │               │
-                │               └─── No
-                │                   └─── Return to mode selection
+                │               └─── (b) Play with untrained model
                 │
-                └─── Learn and Play
+                └─── (b) Learn and Play
                     │
                     └─── Start training from scratch?
                         │
-                        ├─── Yes
-                        │   └─── Start new training
+                        ├─── (a) Load previous model
+                        │   │
+                        │   ├─── Success
+                        │   │   └─── Play and learn with loaded model
+                        │   │
+                        │   └─── Fail
+                        │       │
+                        │       └─── Continue without loaded model?
+                        │           │
+                        │           ├─── (a) Return to mode selection 
+                        │           │
+                        │           └─── (b) Training from scratch
                         │
-                        └─── No
-                            │
-                            └─── Load previous model
-                                │
-                                ├─── Success
-                                │   └─── Play and learn with loaded model
-                                │
-                                └─── Fail
-                                    │
-                                    └─── Continue without loaded model?
-                                        │
-                                        ├─── Yes
-                                        │   └─── Play and learn with untrained model
-                                        │
-                                        └─── No
-                                            └─── Return to mode selection
+                        └─── (b) Start new training
     """
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     
-    while True:
-        agent_type = input("Choose agent type: (a) MLP Agent or (b) CNN Agent (a/b): ").lower()
-        if agent_type in ['a', 'mlp']:
-            agent = MLPAgent(device=device)
-            print("MLP Agent selected.")
-            break
-        elif agent_type in ['b', 'cnn']:
-            agent = CNNAgent(device=device)
-            print("CNN Agent selected.")
-            break
-        else:
-            print("Invalid input. Please enter 'a' for MLP Agent or 'b' for CNN Agent.")
+    if select_action("Choose agent type:\n(a) MLP Agent\n(b) CNN Agent"):
+        agent = MLPAgent(device=device)
+        print("MLP Agent selected.")
+    else:
+        agent = CNNAgent(device=device)
+        print("CNN Agent selected.")
     
     while True:
-        user_input = input("Choose mode: (a) Play or (b) Learn and Play (a/b): ").lower()
-        if user_input in ['a', 'play']:
+        if select_action("Choose mode:\n(a) Play\n(b) Learn and Play"):
             print("Play mode selected.")
             if play_mode(agent):
                 break
-        elif user_input in ['b', 'learn and play']:
-            # create a callback function to update the figure dynamically
-            update_plot = create_training_plotter()
-            
-            print("Learn and Play mode selected.")
-            if learn_and_play_mode(agent, update_plot):
-                break
         else:
-            print("Invalid input. Please enter 'a' for Play or 'b' for Learn and Play.")
+            print("Learn and Play mode selected.")
+            if learn_and_play_mode(agent):
+                break
 
 def play_mode(dqn_agent: LearningAgent):
     """
@@ -100,32 +81,42 @@ def play_mode(dqn_agent: LearningAgent):
                         total_rounds=playing_total_rounds)
         return True
     else:
-        prompt = "Without loaded weights, the agent's performance will be poor. Continue? (y/n): "
-        if confirm_action(prompt):
-            print("Continuing with untrained agent...")
+        print("Failed to load previous model.")
+        if select_action("Continue without loaded model?\n(a) Return to mode selection\n(b) Play with untrained model"):
+            print("Returning to mode selection...")
+            return False
+        else:
+            print("Playing with untrained model...")
             play_with_agent(dqn_agent, 
                             playing_rounds_per_display=playing_rounds_per_display, 
                             total_rounds=playing_total_rounds)
             return True
-        else:
-            print("Returning to mode selection...")
-            return False
 
-def learn_and_play_mode(dqn_agent: LearningAgent, update_plot):
+def learn_and_play_mode(dqn_agent: LearningAgent):
     """
     Return True if agent starts learning and playing else False.
     """
-    if not confirm_action("Start training from scratch? (y/n): "):
+    if select_action("Start training from scratch?\n(a) Load previous model\n(b) Start new training"):
         print("Attempting to load previous model...")
         if load_model(dqn_agent):
             print("Previous model loaded successfully.")
+            print("Starting training with loaded model...")
+            update_plot = create_training_plotter()
+            play_and_learn_with_learning_agent(dqn_agent, 
+                                               total_episodes=learning_total_episodes, 
+                                               update_plot_callback=update_plot, 
+                                               learning_episodes_per_display=learning_episodes_per_display)
+            return True
         else:
             print("Failed to load previous model.")
-            if not confirm_action("Continue with untrained model? (y/n): "):
+            if select_action("Continue without loaded model?\n(a) Return to mode selection\n(b) Training from scratch"):
                 print("Returning to mode selection...")
                 return False
-    
-    print("Starting training...")
+            else:
+                print("Playing and learning with untrained model...")
+    else:
+        print("Starting new training...")
+    update_plot = create_training_plotter()
     play_and_learn_with_learning_agent(dqn_agent, 
                                        total_episodes=learning_total_episodes, 
                                        update_plot_callback=update_plot, 
@@ -142,15 +133,16 @@ def load_model(dqn_agent: LearningAgent):
     else:
         return False
 
-def confirm_action(prompt: str):
+def select_action(prompt: str):
     """
-    If player input 'y' then return True, if input 'n' then return False, else loop.
+    If player input 'a' then return True, if input 'b' then return False, else loop.
     """
     while True:
-        user_input = input(prompt).lower()
-        if user_input in ['y', 'n']:
-            return user_input == 'y'
-        print("Invalid input. Please enter 'y' or 'n'.")
+        user_input = input(prompt + "\n(a/b): ").lower()
+        if user_input in ['a', 'b']:
+            print("\n")
+            return user_input == 'a'
+        print("Invalid input. Please enter 'a' or 'b'.")
 
 if __name__ == "__main__":
     main()
